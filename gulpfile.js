@@ -63,7 +63,7 @@ export const watch = () => {
 };
 
 // Default task executed by running yarn gulp
-export default gulp.series(dlte, html, css, watch);
+export default gulp.series(dlte, css, html, watch);
 
 // can be executed by yarn gulp build
 export const build = gulp.series(dlte, css, html);

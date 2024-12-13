@@ -1,28 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pat Lego.com</title>
-    <meta name="description" content="Patrique Legault's website, all content relating to him and work">
-    <meta name="keywords" content="Patrique Legault, personal website, portfolio, web development, projects">
-    <meta name="author" content="Patrique Legault">
-
-    <!-- Include CSS -->
-    <link href="css/tailwind.css" rel="stylesheet">
-
-    <!-- Include JS -->
-    <script type="module">
-        import alpinejs from 'https://cdn.jsdelivr.net/npm/alpinejs@3.14.7/+esm'
-    </script>
-</head>
-
+@@include('partials/head.html')
 <body>
     <!-- Include header -->
     @@include('partials/header.html')
 
-    <main>
+    <main class="flex-1">
         <h2>Main Content</h2>
         <p>This is the main section of the page.</p>
     </main>
@@ -30,5 +13,4 @@
     <!-- Include footer -->
     @@include('partials/footer.html')
 </body>
-
 </html>
