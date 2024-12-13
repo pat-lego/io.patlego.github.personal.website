@@ -1,0 +1,17 @@
+{
+  "name": "io.patlego.github.personal.website",
+  "version": "1.0.0",
+  "description": "Personal website for Patrique Legault",
+  "type": "module",
+  "main": "index.js",
+  "repository": "https://github.com/pat-lego/io.patlego.github.personal.website",
+  "author": "Patrique Legault",
+  "license": "MIT",
+  "private": false,
+  "devDependencies": {
+    "browser-sync": "^3.0.3",
+    "del": "^8.0.0",
+    "gulp": "^5.0.0",
+    "gulp-file-include": "^2.3.0"
+  }
+}

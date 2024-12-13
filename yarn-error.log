@@ -1,0 +1,36 @@
+Arguments: 
+  /Users/patriquelegault/.nvm/versions/node/v20.9.0/bin/node /Users/patriquelegault/.node/corepack/yarn/1.22.15/bin/yarn.js init
+
+PATH: 
+  /Users/patriquelegault/.nvm/versions/node/v20.9.0/bin:/Users/patriquelegault/.jenv/shims:/Users/patriquelegault/.jenv/bin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/opt/X11/bin:/Library/TeX/texbin:/Users/patriquelegault/.nvm/versions/node/v20.9.0/bin:/Users/patriquelegault/.jenv/shims:/Users/patriquelegault/.jenv/bin:/Users/patriquelegault/.cargo/bin:/Applications/Visual Studio Code.app/Contents/Resources/app/bin:/Users/patriquelegault/Documents/software/apache-maven-3.8.3/bin:/Applications/Visual Studio Code.app/Contents/Resources/app/bin:/Users/patriquelegault/Documents/software/apache-maven-3.8.3/bin
+
+Yarn version: 
+  1.22.15
+
+Node version: 
+  20.9.0
+
+Platform: 
+  darwin x64
+
+Trace: 
+  Error: canceled
+      at Interface.<anonymous> (/Users/patriquelegault/.node/corepack/yarn/1.22.15/lib/cli.js:137145:13)
+      at Interface.emit (node:events:514:28)
+      at [_ttyWrite] [as _ttyWrite] (node:internal/readline/interface:1125:18)
+      at ReadStream.onkeypress (node:internal/readline/interface:264:20)
+      at ReadStream.emit (node:events:514:28)
+      at emitKeys (node:internal/readline/utils:371:14)
+      at emitKeys.next (<anonymous>)
+      at ReadStream.onData (node:internal/readline/emitKeypressEvents:64:36)
+      at ReadStream.emit (node:events:514:28)
+      at addChunk (node:internal/streams/readable:376:12)
+
+npm manifest: 
+  No manifest
+
+yarn manifest: 
+  No manifest
+
+Lockfile: 
+  No lockfile
