@@ -14,14 +14,18 @@ const paths = {
     dest: 'dist/',
   },
   css: {
-    src: 'src/styles/tailwind.css',
+    src: 'src/styles/**/*.css',
     dest: 'dist/css',
+  },
+  assets: {
+    src: 'src/assets/**/*',
+    dest: 'dist/assets/',
   },
 };
 
 // Task to clean the dist folder
 export const dlte = (done) => {
-  deleteSync('dist/**'); // Deletes everything in dist except the folder itself
+  deleteSync('dist/**', {force: true}); // Deletes everything in dist except the folder itself
   done();
 };
 
@@ -50,6 +54,12 @@ export const css = () => {
     .pipe(browser.stream());
 };
 
+// Task to copy assets
+export const assets = () => {
+  return gulp.src(paths.assets.src, {encoding: false})
+    .pipe(gulp.dest(paths.assets.dest));
+};
+
 // Task to serve files with live reload
 export const watch = () => {
   browser.init({
@@ -59,14 +69,16 @@ export const watch = () => {
   });
 
   gulp.watch(paths.html.src, html);
-  gulp.watch('src/styles/**/*.css', css);
+  gulp.watch(paths.css.src, css);
+  gulp.watch(paths.assets.src, assets);
 };
 
+
 // Default task executed by running yarn gulp
-export default gulp.series(dlte, css, html, watch);
+export default gulp.series(dlte, gulp.parallel(css, html, assets), watch);
 
 // can be executed by yarn gulp build
-export const build = gulp.series(dlte, css, html);
+export const build = gulp.series(dlte, gulp.parallel(css, html, assets));
 
-// can be executed by yarn gulp build
+// can be executed by yarn gulp clean
 export const clean = gulp.series(dlte);
