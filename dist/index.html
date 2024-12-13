@@ -1,28 +1,36 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
 
 <head>
-    <title>Pat Legault Website</title>
     <meta charset="UTF-8">
-    <meta name="description" content="Welcome to Pat Legault's personal website.">
-    <meta name="keywords" content="Pat Legault, personal website, portfolio">
-    <meta name="author" content="Pat Legault">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pat Lego.com</title>
+    <meta name="description" content="Patrique Legault's website, all content relating to him and work">
+    <meta name="keywords" content="Patrique Legault, personal website, portfolio, web development, projects">
+    <meta name="author" content="Patrique Legault">
 
-    <!-- The magic -->
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <!-- Include CSS -->
+    <link href="css/tailwind.css" rel="stylesheet">
 
+    <!-- Include JS -->
+    <script type="module">
+        import alpinejs from 'https://cdn.jsdelivr.net/npm/alpinejs@3.14.7/+esm'
+    </script>
 </head>
 
 <body>
     <!-- Include header -->
-    <header>
-    <h1>Welcome to My Site</h1>
-    <nav>
-        <ul>
-            <li><a href="/">Home</a></li>
-            <li><a href="/about">About</a></li>
-        </ul>
-    </nav>
+    <header class="flex justify-between items-center p-4">
+    <h1 class="text-xl font-bold">Pat Lego.com</h1>
+    <div class="flex-col">
+        <nav>
+            <ul class="flex space-x-4">
+                <li><a class="hover:text-blue-500" href="/">Home</a></li>
+                <li><a class="hover:text-blue-500" href="/about">About</a></li>
+                <li><a class="hover:text-blue-500" href="/store">Store</a></li>
+            </ul>
+        </nav>
+    </div>
 </header>
 
     <main>
