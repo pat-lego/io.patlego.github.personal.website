@@ -1,15 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
-    
+
 @@include('partials/head.html')
 
 <body>
     <!-- Include header -->
     @@include('partials/header.html')
 
-    <!-- Include the about section -->
-     @@include('partials/about.html')
+    <main>
+        <!-- Include the about section -->
+        @@include('partials/pages/about.html')
+
+        <!-- Include the resume section -->
+        @@include('partials/pages/resume.html')
+    </main>
 
     <!-- Include footer -->
     @@include('partials/footer.html')
+
 </html>
