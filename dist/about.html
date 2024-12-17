@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+    
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pat Lego.com</title>
+    <meta name="description" content="Patrique Legault's website, all content relating to him and work">
+    <meta name="keywords" content="Patrique Legault, personal website, portfolio, web development, projects">
+    <meta name="author" content="Patrique Legault">
+
+    <!-- Include CSS -->
+    <link href="css/tailwind.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            margin: 0;
+        }
+        main {
+            flex: 1;
+        }
+    </style>
+    
+    <!-- Include JS -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.7/dist/cdn.min.js"></script>
+</head>
+
+<body>
+    <!-- Include header -->
+    <header x-data="{ open: false }">
+    <div class="hidden md:flex w-full justify-between items-center p-4 bg-black">
+        <h1 class="text-xl font-bold text-white">Pat Lego.com</h1>
+        <div class="flex-col">
+            <nav>
+                <ul class="flex space-x-4">
+                    <li><a class="hover:text-blue-500 text-white" href="/">Home</a></li>
+                    <li><a class="hover:text-blue-500 text-white" href="/about.html">About</a></li>
+                    <li><a class="hover:text-blue-500 text-white" target="_blank"
+                            href="https://patrique.gumroad.com/l/sslji">Store</a></li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+    <!-- Mobile View -->
+    <div class="flex md:hidden w-full justify-between items-center p-4 bg-black">
+        <h1 class="text-xl font-bold text-white">Pat Lego.com</h1>
+        <button @click="open = !open" class="text-white focus:outline-none">
+            <!-- Icon for mobile menu button -->
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+            </svg>
+        </button>
+    </div>
+
+    <!-- Mobile Menu -->
+    <div x-show="open" class="md:hidden flex flex-col items-end w-full bg-black p-4">
+        <nav>
+            <ul class="flex flex-col space-y-4">
+                <li><a class="hover:text-blue-500 text-white" href="/">Home</a></li>
+                <li><a class="hover:text-blue-500 text-white" href="/about.html">About</a></li>
+                <li><a class="hover:text-blue-500 text-white" target="_blank" href="https://patrique.gumroad.com/l/sslji">Store</a></li>
+            </ul>
+        </nav>
+    </div>
+</header>
+
+    <!-- Include the about section -->
+     <main>
+    <section>
+        <!-- Desktop View -->
+        <div class="hidden md:flex justify-center items-center w-full">
+            <img src="assets/aboutme1x1.png" alt="Image description">
+            <div class="flex ml-16 items-center">
+                <ul>
+                    <li><span class="font-bold">Name:</span> <span class="italic">Patrique Legault</span></li>
+                    <li><span class="font-bold">Employer:</span> <span class="italic">Adobe</span></li>
+                    <li><span class="font-bold">Role:</span> <span class="italic">Technical Support Engineer</span></li>
+                    <li><span class="font-bold">Passions:</span> <span class="italic">Cooking, Music and Coding</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <!-- Mobile View -->
+        <div class="flex flex-col md:hidden justify-center items-center w-full">
+            <img src="assets/aboutme.png" alt="Image description" class="w-2/3 h-2/3">
+            <div class="flex mt-10 items-center">
+                <ul>
+                    <li class="text-center"><span class="font-bold">Name:</span> <span class="italic">Patrique
+                            Legault</span></li>
+                    <li class="text-center"><span class="font-bold">Employer:</span> <span class="italic">Adobe</span>
+                    </li>
+                    <li class="text-center"><span class="font-bold">Role:</span> <span class="italic">Technical Support
+                            Engineer</span></li>
+                    <li class="text-center"><span class="font-bold">Passions:</span> <span class="italic">Cooking, Music
+                            and Coding</span></li>
+                </ul>
+            </div>
+        </div>
+    </section>
+    <section>
+        <div class="bg-gray-50 min-h-screen flex items-center justify-center mt-5">
+    <div class="w-full md:w-1/2 max-w-4xl bg-white shadow-lg rounded-lg overflow-hidden">
+         <div class="p-8">
+            <div class="space-y-8">
+                <!-- Work Experience 1 -->
+                <div class="border-l-4 border-blue-500 pl-4">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-2xl font-semibold text-gray-800">Support Engineer</h2>
+                        <span class="text-gray-600 text-sm">2021 - Present</span>
+                    </div>
+                    <p class="text-gray-700 font-medium mb-2 underline">Adobe Systems Inc.</p>
+                    <ul class="text-gray-600 space-y-2 md:list-disc md:list-inside">
+                        <li>Created training courses for new software solutions used by internal employees to debug and troubleshoot</li>
+                        <li>Troubleshooted complex Java enterprise solutions in order to rectify customers content and serve requests adequitely</li>
+                        <li>Contributed bug fixes to the engineering teams allowing them to focus on new features</li>
+                    </ul>
+                </div>
+
+                <!-- Work Experience 2 -->
+                <div class="border-l-4 border-green-500 pl-4">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-2xl font-semibold text-gray-800">Senior Systems Analyst</h2>
+                        <span class="text-gray-600 text-sm">2019 - 2021</span>
+                    </div>
+                    <p class="text-gray-700 font-medium mb-2 underline">AFTIA Solutions</p>
+                    <ul class="text-gray-600 space-y-2 md:list-disc md:list-inside">
+                        <li>Developed responsive web applications Adobe Experience Manager Forms</li>
+                        <li>Built server side Java workflows to process form data</li>
+                        <li>Integrated solutions with Adobe Experience Manager allowing for seemeless data exchange</li>
+                    </ul>
+                </div>
+
+                <!-- Work Experience 3 -->
+                <div class="border-l-4 border-purple-500 pl-4">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-2xl font-semibold text-gray-800">Senior Developer</h2>
+                        <span class="text-gray-600 text-sm">2018 - 2019</span>
+                    </div>
+                    <p class="text-gray-700 font-medium mb-2 underline">University of Ottawa</p>
+                    <ul class="text-gray-600 space-y-2 md:list-disc md:list-inside">
+                        <li>Managed a team of 8 Java Developers</li>
+                        <li>Created the ICS3U secondary school course and received accreditation from the ministry of Ontario</li>
+                        <li>Built the initial <a class="underline text-blue-500" href="https://forms.outstem.io/uOttawa">Outstem</a> platform using the following technologies</li>
+                    </ul>
+                </div>
+                <div class="border-l-4 border-green-500 pl-4">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-2xl font-semibold text-gray-800">Senior Systems Analyst</h2>
+                        <span class="text-gray-600 text-sm">2016 - 2018</span>
+                    </div>
+                    <p class="text-gray-700 font-medium mb-2 underline">AFTIA Solutions</p>
+                    <ul class="text-gray-600 space-y-2 md:list-disc md:list-inside">
+                        <li>Installed and configured Adobe Experience Manager Forms</li>
+                        <li>Configured various J2EE application servers and databases</li>
+                        <li>Developed workflows for customers using Adobe Workbench</li>
+                    </ul>
+                </div>
+                <div class="border-l-4 border-green-500 pl-4">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-2xl font-semibold text-gray-800">Systems Analyst</h2>
+                        <span class="text-gray-600 text-sm">2014 - 2016</span>
+                    </div>
+                    <p class="text-gray-700 font-medium mb-2 underline">4Point Solutions</p>
+                    <ul class="text-gray-600 space-y-2 md:list-disc md:list-inside">
+                        <li>Installed and configured various implementations of Adobe Experience Manager Forms</li>
+                        <li>Worked with customers to install WebSphere</li>
+                        <li>Built and customized various HTML5 based applications based on customer requirements</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Technical Skills -->
+            <div class="mt-8 pt-6 border-t border-gray-200">
+                <h3 class="text-xl font-semibold text-gray-800 mb-4">Technical Skills</h3>
+                <div class="grid grid-cols-3 gap-4">
+                    <div class="bg-gray-100 rounded-md p-3 text-center hover:bg-blue-300">
+                        <p class="font-medium text-gray-700">JavaScript</p>
+                    </div>
+                    <div class="bg-gray-100 rounded-md p-3 text-center hover:bg-blue-300">
+                        <p class="font-medium text-gray-700">Java</p>
+                    </div>
+                    <div class="bg-gray-100 rounded-md p-3 text-center hover:bg-blue-300">
+                        <p class="font-medium text-gray-700">Node.js</p>
+                    </div>
+                    <div class="bg-gray-100 rounded-md p-3 text-center hover:bg-blue-300">
+                        <p class="font-medium text-gray-700">HTML</p>
+                    </div>
+                    <div class="bg-gray-100 rounded-md p-3 text-center hover:bg-blue-300">
+                        <p class="font-medium text-gray-700">CSS</p>
+                    </div>
+                    <div class="bg-gray-100 rounded-md p-3 text-center hover:bg-blue-300">
+                        <p class="font-medium text-gray-700">Maven</p>
+                    </div>
+                    <div class="bg-gray-100 rounded-md p-3 text-center hover:bg-blue-300">
+                        <p class="font-medium text-gray-700">Linux</p>
+                    </div>
+                    <div class="bg-gray-100 rounded-md p-3 text-center hover:bg-blue-300">
+                        <p class="font-medium text-gray-700">OSGi</p>
+                    </div>
+                    <div class="bg-gray-100 rounded-md p-3 text-center hover:bg-blue-300">
+                        <p class="font-medium text-gray-700">AWS</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+    </section>
+</main>
+
+    <!-- Include footer -->
+    <footer class="bg-black text-white p-4">
+    <div class="flex justify-between items-center">
+        <p>&copy; Pat Lego.com</p>
+        <div class="flex items-start space-x-4">
+            <a class="mr-5" href="https://www.linkedin.com/in/patrique-legault" target="_blank">
+                <i class="fab fa-linkedin fa-2x"></i>
+            </a>
+            <a class="pr-5" href="https://twitter.com/_patlego" target="_blank">
+                <i class="fab fa-twitter fa-2x"></i>
+            </a>
+        </div>
+    </div>
+</footer>
+</html>
