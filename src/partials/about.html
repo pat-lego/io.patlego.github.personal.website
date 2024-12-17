@@ -1,0 +1,36 @@
+<main>
+    <section>
+        <!-- Desktop View -->
+        <div class="hidden md:flex justify-center items-center w-full">
+            <img src="assets/aboutme1x1.png" alt="Image description">
+            <div class="flex ml-16 items-center">
+                <ul>
+                    <li><span class="font-bold">Name:</span> <span class="italic">Patrique Legault</span></li>
+                    <li><span class="font-bold">Employer:</span> <span class="italic">Adobe</span></li>
+                    <li><span class="font-bold">Role:</span> <span class="italic">Technical Support Engineer</span></li>
+                    <li><span class="font-bold">Passions:</span> <span class="italic">Cooking, Music and Coding</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <!-- Mobile View -->
+        <div class="flex flex-col md:hidden justify-center items-center w-full">
+            <img src="assets/aboutme.png" alt="Image description" class="w-2/3 h-2/3">
+            <div class="flex mt-10 items-center">
+                <ul>
+                    <li class="text-center"><span class="font-bold">Name:</span> <span class="italic">Patrique
+                            Legault</span></li>
+                    <li class="text-center"><span class="font-bold">Employer:</span> <span class="italic">Adobe</span>
+                    </li>
+                    <li class="text-center"><span class="font-bold">Role:</span> <span class="italic">Technical Support
+                            Engineer</span></li>
+                    <li class="text-center"><span class="font-bold">Passions:</span> <span class="italic">Cooking, Music
+                            and Coding</span></li>
+                </ul>
+            </div>
+        </div>
+    </section>
+    <section>
+        @@include('resume.html')
+    </section>
+</main>
