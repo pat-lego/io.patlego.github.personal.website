@@ -68,8 +68,7 @@ export const watch = () => {
     },
   });
 
-  gulp.watch(paths.html.src, html);
-  gulp.watch(paths.css.src, css);
+  gulp.watch(paths.html.src, gulp.series(css, html));
   gulp.watch(paths.assets.src, assets);
 };
 
