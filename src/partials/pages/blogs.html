@@ -1,0 +1,41 @@
+<section>
+    <!-- Desktop View -->
+    <div class="hidden md:flex w-full">
+        <div class="flex flex-col justify-start w-1/5 border-r-2 border-black min-h-screen">
+            <input type="text" class="w-full" placeholder="Search">
+            <li class="w-full list-none mt-5"
+                x-data="{blogs: [ {name:'Blog 1', url:'/blogs/blog-1.html'}, {name:'Blog 2', url: '/blogs/blog-2.html'} ]}">
+                <template x-for="blog in blogs">
+                    <ul class="ml-5 hover:underline" x-on:click="document.location.href=blog.url" x-text="blog.name">
+                    </ul>
+                </template>
+            </li>
+        </div>
+        <div id="blog" class="flex w-4/5 justify-center">
+            <div class="min-h-screen flex items-center">
+                Start your first read 😊
+            </div>
+        </div>
+    </div>
+    <!-- Mobile View-->
+    <div class="flex flex-col md:hidden w-full">
+        <div class="w-full flex justify-center m-5 underline text-2xl">
+            <h1>Select a blog to read</h1>
+        </div>
+        <div class="flex w-full">
+            <div class="flex justify-start items-start">
+                <input type="text" placeholder="Search">
+            </div>
+            <div class="flex w-4/5 border-l-2 min-h-screen border-black justify-center">
+                <li class="list-none"
+                    x-data="{blogs: [ {name:'Blog 1', url:'/blogs/blog-1.html'}, {name:'Blog 2', url: '/blogs/blog-2.html'} ]}">
+                    <template x-for="blog in blogs">
+                        <ul class="mt-1 mb-1 text-2xl hover:underline" x-on:click="document.location.href=blog.url"
+                            x-text="blog.name">
+                        </ul>
+                    </template>
+                </li>
+            </div>
+        </div>
+    </div>
+</section>

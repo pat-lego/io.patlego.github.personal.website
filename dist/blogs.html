@@ -26,6 +26,7 @@
     <!-- Include JS -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.7/dist/cdn.min.js"></script>
 </head>
+
 <body>
     <!-- Include header -->
     <header x-data="{ open: false }">
@@ -66,17 +67,50 @@
         </nav>
     </div>
 </header>
-
-    <!-- Include the main content  -->
-    <main class="flex flex-col items-center justify-center w-full h-screen text-center">
-    <h1 class="font-bold mb-4 text-2xl">Pat Legault's Website</h1>
-    <img src="assets/engineer-debugging.jpg" alt="Software Engineering" class="object-cover mb-4">
-    <div class="mt-5 w-2/3">
-        <p class="italic">My name is Patrique and I am a software support engineer. I have a passion for coding and I am always
-        looking for new challenges. I am currently working at <a href="https://www.adobe.com/" target="_blank"
-            class="text-blue-500">Adobe</a> as a software support engineer.</p>
+    
+    <main>
+        <section>
+    <!-- Desktop View -->
+    <div class="hidden md:flex w-full">
+        <div class="flex flex-col justify-start w-1/5 border-r-2 border-black min-h-screen">
+            <input type="text" class="w-full" placeholder="Search">
+            <li class="w-full list-none mt-5"
+                x-data="{blogs: [ {name:'Blog 1', url:'/blogs/blog-1.html'}, {name:'Blog 2', url: '/blogs/blog-2.html'} ]}">
+                <template x-for="blog in blogs">
+                    <ul class="ml-5 hover:underline" x-on:click="document.location.href=blog.url" x-text="blog.name">
+                    </ul>
+                </template>
+            </li>
+        </div>
+        <div id="blog" class="flex w-4/5 justify-center">
+            <div class="min-h-screen flex items-center">
+                Start your first read 😊
+            </div>
+        </div>
     </div>
-</main>
+    <!-- Mobile View-->
+    <div class="flex flex-col md:hidden w-full">
+        <div class="w-full flex justify-center m-5 underline text-2xl">
+            <h1>Select a blog to read</h1>
+        </div>
+        <div class="flex w-full">
+            <div class="flex justify-start items-start">
+                <input type="text" placeholder="Search">
+            </div>
+            <div class="flex w-4/5 border-l-2 min-h-screen border-black justify-center">
+                <li class="list-none"
+                    x-data="{blogs: [ {name:'Blog 1', url:'/blogs/blog-1.html'}, {name:'Blog 2', url: '/blogs/blog-2.html'} ]}">
+                    <template x-for="blog in blogs">
+                        <ul class="mt-1 mb-1 text-2xl hover:underline" x-on:click="document.location.href=blog.url"
+                            x-text="blog.name">
+                        </ul>
+                    </template>
+                </li>
+            </div>
+        </div>
+    </div>
+</section>
+    </main>
 
     <!-- Include footer -->
     <footer class="bg-black text-white p-4">
@@ -93,4 +127,5 @@
     </div>
 </footer>
 </body>
+
 </html>
