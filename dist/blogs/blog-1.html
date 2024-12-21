@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
-<div x-show="isMobile">
-    <head>
+
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pat Lego.com</title>
@@ -27,10 +27,9 @@
     <!-- Include JS -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.7/dist/cdn.min.js"></script>
 </head>
-</div>
 
 <body>
-    <div x-show="isMobile">
+    <div>
         <!-- Include header -->
         <header x-data="{ open: false }">
     <div class="hidden md:flex w-full justify-between items-center p-4 bg-black">
@@ -72,16 +71,24 @@
     </div>
 </header>
     </div>
+    
     <main>
-        <div class="flex flex-col items-center">
-            <h1>Blog 1</h1>
-            <p>This is the first blog.</p>
+        <section>
+    <div class="flex flex-col items-center min-h-screen">
+        <h1 class="font-bold m-1 text-2xl md:text-xl md:m-5">Git Init</h1>
+        <div class="flex justify-center min-h-screen m-5 md:m-1 text-xl w-4/5 md:w-2/3">
+            <p>This insnt really a blog post more of an intro.
+                My name is Patrique and I specialize in a enterprise Java technology, specifically in the CMS
+                (Content Management Space). </p>
+            <p></p>
         </div>
+    </div>
+</section>
+
     </main>
 
-    <div x-show="isMobile">
-        <!-- Include footer -->
-        <footer class="bg-black text-white p-4">
+    <!-- Include footer -->
+    <footer class="bg-black text-white p-4">
     <div class="flex justify-between items-center">
         <p>&copy; Pat Lego.com</p>
         <div class="flex items-start space-x-4">
@@ -94,7 +101,7 @@
         </div>
     </div>
 </footer>
-    </div>
 </body>
+
 
 </html>

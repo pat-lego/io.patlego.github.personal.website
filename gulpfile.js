@@ -46,7 +46,7 @@ export const htmlPages = () => {
 // Task to include HTML partials
 export const htmlBlogs = () => {
   return gulp
-    .src('src/blogs/*.html')
+    .src('src/blogs/**/*.html')
     .pipe(
       fileInclude({
         prefix: '@@',
