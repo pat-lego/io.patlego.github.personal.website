@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+<div x-show="isMobile">
+    <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pat Lego.com</title>
@@ -26,9 +27,12 @@
     <!-- Include JS -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.7/dist/cdn.min.js"></script>
 </head>
+</div>
+
 <body>
-    <!-- Include header -->
-    <header x-data="{ open: false }">
+    <div x-show="isMobile">
+        <!-- Include header -->
+        <header x-data="{ open: false }">
     <div class="hidden md:flex w-full justify-between items-center p-4 bg-black">
         <h1 class="text-xl font-bold text-white">Pat Lego.com</h1>
         <div class="flex-col">
@@ -67,20 +71,17 @@
         </nav>
     </div>
 </header>
-
-    <!-- Include the main content  -->
-    <main class="flex flex-col items-center justify-center w-full h-screen text-center">
-    <h1 class="font-bold mb-4 text-2xl">Pat Legault's Website</h1>
-    <img src="assets/engineer-debugging.jpg" alt="Software Engineering" class="object-cover mb-4">
-    <div class="mt-5 w-2/3">
-        <p class="italic">My name is Patrique and I am a software support engineer. I have a passion for coding and I am always
-        looking for new challenges. I am currently working at <a href="https://www.adobe.com/" target="_blank"
-            class="text-blue-500">Adobe</a> as a software support engineer.</p>
     </div>
-</main>
+    <main>
+        <div class="flex flex-col items-center">
+            <h1>Blog 1</h1>
+            <p>This is the first blog.</p>
+        </div>
+    </main>
 
-    <!-- Include footer -->
-    <footer class="bg-black text-white p-4">
+    <div x-show="isMobile">
+        <!-- Include footer -->
+        <footer class="bg-black text-white p-4">
     <div class="flex justify-between items-center">
         <p>&copy; Pat Lego.com</p>
         <div class="flex items-start space-x-4">
@@ -93,5 +94,7 @@
         </div>
     </div>
 </footer>
+    </div>
 </body>
+
 </html>

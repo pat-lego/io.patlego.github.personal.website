@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<div x-show="isMobile">
+    @@include('../partials/head.html')
+</div>
+
+<body>
+    <div x-show="isMobile">
+        <!-- Include header -->
+        @@include('../partials/header.html')
+    </div>
+    <main>
+        <div class="flex flex-col items-center">
+            <h1>Blog 1</h1>
+            <p>This is the first blog.</p>
+        </div>
+    </main>
+
+    <div x-show="isMobile">
+        <!-- Include footer -->
+        @@include('../partials/footer.html')
+    </div>
+</body>
+
+</html>
