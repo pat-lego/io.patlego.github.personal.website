@@ -30,7 +30,7 @@ export const dlte = (done) => {
 };
 
 // Task to include HTML partials
-export const html = () => {
+export const htmlPages = () => {
   return gulp
     .src('src/*.html')
     .pipe(
@@ -40,6 +40,20 @@ export const html = () => {
       })
     )
     .pipe(gulp.dest('dist'))
+    .pipe(browser.stream());
+};
+
+// Task to include HTML partials
+export const htmlBlogs = () => {
+  return gulp
+    .src('src/blogs/*.html')
+    .pipe(
+      fileInclude({
+        prefix: '@@',
+        basepath: '@file',
+      })
+    )
+    .pipe(gulp.dest('dist/blogs'))
     .pipe(browser.stream());
 };
 
@@ -68,16 +82,16 @@ export const watch = () => {
     },
   });
 
-  gulp.watch(paths.html.src, gulp.series(css, html));
+  gulp.watch(paths.html.src, gulp.series(css, htmlBlogs, htmlPages));
   gulp.watch(paths.assets.src, assets);
 };
 
 
 // Default task executed by running yarn gulp
-export default gulp.series(dlte, gulp.parallel(css, html, assets), watch);
+export default gulp.series(dlte, gulp.parallel(css, htmlBlogs, htmlPages, assets), watch);
 
 // can be executed by yarn gulp build
-export const build = gulp.series(dlte, gulp.parallel(css, html, assets));
+export const build = gulp.series(dlte, gulp.parallel(css, htmlBlogs, htmlPages, assets));
 
 // can be executed by yarn gulp clean
 export const clean = gulp.series(dlte);

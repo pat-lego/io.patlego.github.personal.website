@@ -9,7 +9,7 @@
     <meta name="author" content="Patrique Legault">
 
     <!-- Include CSS -->
-    <link href="css/tailwind.css" rel="stylesheet">
+    <link href="../css/tailwind.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         body {
@@ -62,6 +62,7 @@
             <ul class="flex flex-col space-y-4">
                 <li><a class="hover:text-blue-500 text-white" href="/">Home</a></li>
                 <li><a class="hover:text-blue-500 text-white" href="/about.html">About</a></li>
+                <li><a class="hover:text-blue-500 text-white" href="/blogs.html">Blogs</a></li>
                 <li><a class="hover:text-blue-500 text-white" target="_blank" href="https://patrique.gumroad.com/l/sslji">Store</a></li>
             </ul>
         </nav>
@@ -72,12 +73,16 @@
         <section>
     <!-- Desktop View -->
     <div class="hidden md:flex w-full">
-        <div class="flex flex-col justify-start w-1/5 border-r-2 border-black min-h-screen">
-            <input type="text" class="w-full" placeholder="Search">
-            <li class="w-full list-none mt-5"
-                x-data="{blogs: [ {name:'Blog 1', url:'/blogs/blog-1.html'}, {name:'Blog 2', url: '/blogs/blog-2.html'} ]}">
-                <template x-for="blog in blogs">
-                    <ul class="ml-5 hover:underline" x-on:click="document.location.href=blog.url" x-text="blog.name">
+        <div class="flex flex-col justify-start w-1/5 border-r-2 border-black min-h-screen" x-data="getBlogs">
+            <input type="text" 
+                   class="w-full" 
+                   placeholder="Search" 
+                   x-ref="searchInput" 
+                   x-model="search"
+                   x-on:keydown.window.prevent.slash="$refs.searchInput.focus()"/>
+            <li class="w-full list-none mt-5">
+                <template x-for="blog in filteredBlogs">
+                    <ul class="ml-5 hover:underline" x-on:click="loadBlog(blog)" x-text="blog.name">
                     </ul>
                 </template>
             </li>
@@ -90,17 +95,21 @@
     </div>
     <!-- Mobile View-->
     <div class="flex flex-col md:hidden w-full">
-        <div class="w-full flex justify-center m-5 underline text-2xl">
+        <div class="flex justify-center m-5 underline text-2xl">
             <h1>Select a blog to read</h1>
         </div>
-        <div class="flex w-full">
-            <div class="flex justify-start items-start">
-                <input type="text" placeholder="Search">
+        <div class="flex w-full" x-data="getBlogs">
+            <div class="flex w-2/5 justify-start items-start">
+                <input type="text" 
+                class="w-full" 
+                placeholder="Search" 
+                x-ref="searchInput" 
+                x-model="search"
+                x-on:keydown.window.prevent.slash="$refs.searchInput.focus()"/>
             </div>
             <div class="flex w-4/5 border-l-2 min-h-screen border-black justify-center">
-                <li class="list-none"
-                    x-data="{blogs: [ {name:'Blog 1', url:'/blogs/blog-1.html'}, {name:'Blog 2', url: '/blogs/blog-2.html'} ]}">
-                    <template x-for="blog in blogs">
+                <li class="list-none">
+                    <template x-for="blog in filteredBlogs">
                         <ul class="mt-1 mb-1 text-2xl hover:underline" x-on:click="document.location.href=blog.url"
                             x-text="blog.name">
                         </ul>
@@ -110,6 +119,55 @@
         </div>
     </div>
 </section>
+<script>
+    function loadBlog(e) {
+        fetch(e.url)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok ' + response.statusText);
+                }
+                return response.text().then(data => ({
+                    status: response.status,
+                    data: data
+                }));
+            })
+            .then(result => {
+                console.log('Status:', result.status);
+                document.getElementById('blog').innerHTML = result.data;
+            })
+            .catch(error => {
+                console.error('Fetch error:', error);
+                document.getElementById('blog').innerHTML = `
+                 <main>
+                    <div class="flex flex-col items-center justify-center min-h-screen">
+                        <h1 class="font-bold">I couldn't find that blog...</h1>
+                    </div>
+                </main>
+                `;
+            });
+    }
+    function getBlogs() {
+        return {
+            search: '',
+            allBlogs: blogs,
+            get filteredBlogs() {
+                if (!this.search) {
+                    return this.allBlogs;
+                }
+                return this.allBlogs.filter(blog => {
+                    return blog.name.toLowerCase().includes(this.search.toLowerCase());
+                });
+            },
+        };
+    }
+    function isMobile() {
+        return document.location.href.includes("?mobileView=true")
+    }
+    const blogs = [
+            { name: 'Blog 1', url: '/blogs/blog-1.html' },
+            { name: 'Blog 2', url: '/blogs/blog-2.html' }
+        ]
+</script>
     </main>
 
     <!-- Include footer -->
