@@ -499,6 +499,9 @@ video {
 [hidden]:where(:not([hidden="until-found"])) {
   display: none;
 }
+.m-1 {
+  margin: 0.25rem;
+}
 .m-5 {
   margin: 1.25rem;
 }
@@ -559,6 +562,9 @@ video {
 .w-2\/3 {
   width: 66.666667%;
 }
+.w-2\/5 {
+  width: 40%;
+}
 .w-4\/5 {
   width: 80%;
 }
@@ -567,9 +573,6 @@ video {
 }
 .w-full {
   width: 100%;
-}
-.w-2\/5 {
-  width: 40%;
 }
 .max-w-4xl {
   max-width: 56rem;
@@ -644,9 +647,6 @@ video {
 }
 .border-t {
   border-top-width: 1px;
-}
-.border-none {
-  border-style: none;
 }
 .border-black {
   --tw-border-opacity: 1;
@@ -781,6 +781,14 @@ video {
 }
 @media (min-width: 768px) {
 
+  .md\:m-5 {
+    margin: 1.25rem;
+  }
+
+  .md\:m-1 {
+    margin: 0.25rem;
+  }
+
   .md\:flex {
     display: flex;
   }
@@ -793,12 +801,29 @@ video {
     width: 50%;
   }
 
+  .md\:w-2\/3 {
+    width: 66.666667%;
+  }
+
   .md\:list-inside {
     list-style-position: inside;
   }
 
   .md\:list-disc {
     list-style-type: disc;
+  }
+
+  .md\:items-center {
+    align-items: center;
+  }
+
+  .md\:items-baseline {
+    align-items: baseline;
+  }
+
+  .md\:text-xl {
+    font-size: 1.25rem;
+    line-height: 1.75rem;
   }
 }
 /*# sourceMappingURL=tailwind.css.map */
