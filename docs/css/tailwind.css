@@ -797,6 +797,10 @@ video {
     display: none;
   }
 
+  .md\:min-h-96 {
+    min-height: 24rem;
+  }
+
   .md\:w-1\/2 {
     width: 50%;
   }
