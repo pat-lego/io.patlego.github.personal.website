@@ -11,25 +11,25 @@ const browser = browserSync.create();
 const paths = {
   html: {
     src: 'src/**/*.html',
-    dest: 'dist/',
+    dest: 'docs/',
   },
   css: {
     src: 'src/styles/**/*.css',
-    dest: 'dist/css',
+    dest: 'docs/css',
   },
   assets: {
     src: 'src/assets/**/*',
-    dest: 'dist/assets/',
+    dest: 'docs/assets/',
   },
   cname: {
     src: 'CNAME',
-    dest: 'dist',
+    dest: 'docs',
   },
 };
 
-// Task to clean the dist folder
+// Task to clean the docs folder
 export const dlte = (done) => {
-  deleteSync('dist/**', {force: true}); // Deletes everything in dist except the folder itself
+  deleteSync('docs/**', {force: true}); // Deletes everything in docs except the folder itself
   done();
 };
 
@@ -43,7 +43,7 @@ export const htmlPages = () => {
         basepath: '@file',
       })
     )
-    .pipe(gulp.dest('dist'))
+    .pipe(gulp.dest('docs'))
     .pipe(browser.stream());
 };
 
@@ -57,7 +57,7 @@ export const htmlBlogs = () => {
         basepath: '@file',
       })
     )
-    .pipe(gulp.dest('dist/blogs'))
+    .pipe(gulp.dest('docs/blogs'))
     .pipe(browser.stream());
 };
 
@@ -82,7 +82,7 @@ export const assets = () => {
 export const watch = () => {
   browser.init({
     server: {
-      baseDir: 'dist',
+      baseDir: 'docs',
     },
   });
 
