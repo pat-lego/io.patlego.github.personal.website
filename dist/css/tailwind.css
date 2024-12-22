@@ -583,6 +583,9 @@ video {
 .grid-cols-3 {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
+.flex-row {
+  flex-direction: row;
+}
 .flex-col {
   flex-direction: column;
 }
@@ -781,12 +784,12 @@ video {
 }
 @media (min-width: 768px) {
 
-  .md\:m-5 {
-    margin: 1.25rem;
-  }
-
   .md\:m-1 {
     margin: 0.25rem;
+  }
+
+  .md\:m-5 {
+    margin: 1.25rem;
   }
 
   .md\:flex {
@@ -811,14 +814,6 @@ video {
 
   .md\:list-disc {
     list-style-type: disc;
-  }
-
-  .md\:items-center {
-    align-items: center;
-  }
-
-  .md\:items-baseline {
-    align-items: baseline;
   }
 
   .md\:text-xl {
