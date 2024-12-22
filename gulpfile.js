@@ -23,7 +23,7 @@ const paths = {
   },
   cname: {
     src: 'CNAME',
-    dest: 'dist/CNAME',
+    dest: 'dist',
   },
 };
 
@@ -97,7 +97,7 @@ export default gulp.series(dlte, gulp.parallel(css, htmlBlogs, htmlPages, assets
 // can be executed by yarn gulp build
 export const build = gulp.series(dlte, gulp.parallel(css, htmlBlogs, htmlPages, assets));
 
-export const publish = gulp.series(build, () => {
+export const deploy = gulp.series(build, () => {
   return gulp.src(paths.cname.src)
     .pipe(gulp.dest(paths.cname.dest));
 });
