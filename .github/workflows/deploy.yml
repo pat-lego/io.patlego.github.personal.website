@@ -16,7 +16,7 @@ jobs:
           node-version: '20.9.0'
       - name: Install dependencies
         run: yarn install
-      - name: Build project
+      - name: Build project 
         run: yarn publish
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
