@@ -136,14 +136,13 @@
                 configuration. The API call will define what requests we want to proxy out to the external service. Now
                 if you want to proxy to an HTTP or HTTPS enabled service you do not need to provide a payload to the
                 request. Simply make an empty PUT request to the API. Seeing how this blog focuses on proxying, via the
-                HTTPD server, whihc is mainly for HTTP and HTTPS services the assumption is that an empty PUT requst is
+                HTTPD server, which is mainly for HTTP and HTTPS services the assumption is that an empty PUT request is
                 all that is needed.
             </p>
             <p class="m-5">
                 Congratulations, you now have your network setup and your configuration rules in place to handle the
                 flow of traffic, now all thats left is configuring the VHost to proxy through the networking
-                infrastructure we created. The last part now is to configure your VHost, I will post a sample
-                configuration and then go through the sections of the example explaining its setup.
+                infrastructure we created. Below is a sample VHost configuration, we will review it and explain its configuraion in the following sections.
             </p>
             <div class="flex w-full justify-center">
                 <div class="bg-gray-100 rounded-lg shadow-md overflow-auto w-full md:w-2/3">
@@ -237,14 +236,12 @@
                 and <span class="italic"> AEM_HTTP_PROXY_PORT</span> (line 9). The <span class="italic">
                     AEM_HTTP_PROXY_HOST </span> and <span class="italic"> AEM_HTTP_PROXY_PORT</span> are the host and
                 port
-                of the proxy server that will be used to proxy the request. Then within the VHost configuration we
-                include the <span class="italic">custom.vars</span> file and then we define the VirtualHost
-                configuration.
+                of the proxy server that will be used to proxy the request. This does not need to be setup by anyone, it is created for you when you create the advanced networking configuration (i.e. it gets created as part of the PUT request). Then we include the <span class="italic">custom.vars</span> file within the VHost configuration in order for them to be referencable.
             </p>
             <p class="m-5">
                 The VirtualHost configuration is pretty standard, but the key part is the <span
                     class="italic">LocationMatch</span> block (line 24 -
-                26). This block is where we define the proxy rules. The <span class="italic">ProxyPassMatch</span>
+                27). This block is where we define the proxy rules. The <span class="italic">ProxyPassMatch</span>
                 directive is used to define the
                 URL pattern that we want to proxy. In this case we are proxying all requests that match the pattern
                 /api/services/* to the <span class="italic">EXTERNAL_SERVICE_ENDPOINT</span>. The <span class="italic">
@@ -304,7 +301,7 @@
                 the responses being proxied
                 back to the client. Leveraging this feature now allows you to serve content from your external service
                 without having any direct communication with AEM. This means you preserve your AEM instance to only work
-                on requests that it absolutely needs to process and everything else is offloaded the JVM. This is a
+                on requests that it absolutely needs to process and everything else is offloaded from the JVM. This is a
                 great way to scale your AEM instance and make sure that it is only processing the requests that it needs
                 to process.
             </p>
