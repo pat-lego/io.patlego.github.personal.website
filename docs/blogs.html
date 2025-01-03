@@ -16,7 +16,7 @@
 <meta property="og:image:height" content="1080" />
 <meta property="og:image:alt" content="Pat Legault profile picture" />
 <meta property="og:type" content="website" />
-<meta property="og:URL" content="https://www.patlego.com" />
+<meta property="og:url" content="https://www.patlego.com" />
 
 <!-- Include CSS -->
 <link href="../css/tailwind.css" rel="stylesheet">
@@ -86,8 +86,11 @@
     <!-- Desktop View -->
     <div class="hidden md:flex w-full">
         <div class="flex flex-col justify-start w-1/5 border-r-2 border-black min-h-screen" x-data="getBlogs">
-            <input type="text" class="w-full" placeholder="Search" x-ref="searchInput" x-model="search"
-                x-on:keydown.window.prevent.slash="$refs.searchInput.focus()" />
+            <div class="flex flex-row mt-2 justify-start">
+                <span class="mr-2">Search:</span>
+                <input type="text" class="w-full border-b-2 border-black" placeholder="Search" x-ref="searchInput" x-model="search"
+                    x-on:keydown.window.prevent.slash="$refs.searchInput.focus()" />
+            </div>
             <li class="w-full list-none mt-5">
                 <template x-for="blog in filteredBlogs">
                     <ul class="ml-5 hover:underline" x-on:click="loadBlog(blog)" x-text="blog.name">
@@ -103,22 +106,23 @@
     </div>
     <!-- Mobile View-->
     <div class="flex flex-col md:hidden w-full">
-        <div class="flex justify-center m-5 underline text-2xl">
+        <div class="flex justify-center m-5 text-2xl">
             <h1>Select a blog to read</h1>
         </div>
         <div class="flex w-full" x-data="getBlogs">
-            <div class="flex w-2/5 justify-start items-start">
-                <input type="text" class="w-full" placeholder="Search" x-ref="searchInput" x-model="search"
+            <div class="flex flex-col w-2/5 justify-start items-start">
+                <span class="mr-2">Type a blog title</span>
+                <input type="text" class="w-full border-b-2 border-black" placeholder="Search" x-ref="searchInput" x-model="search"
                     x-on:keydown.window.prevent.slash="$refs.searchInput.focus()" />
             </div>
             <div class="flex w-4/5 border-l-2 min-h-screen border-black justify-center">
-                <li class="list-none">
+                <ul class="list-none">
                     <template x-for="blog in filteredBlogs">
-                        <ul class="mt-1 mb-1 text-2xl hover:underline" x-on:click="mobileClick(blog.url)"
+                        <li class="m-2 text-2xl hover:underline" x-on:click="mobileClick(blog.url)"
                             x-text="blog.name">
-                        </ul>
+                        </li>
                     </template>
-                </li>
+                </ul>
             </div>
         </div>
     </div>
@@ -168,7 +172,8 @@
         };
     };
     const blogs = [
-        { name: 'Git Init', url: '/blog-1.html' }
+        { name: 'Git Init', url: '/blog-1.html' },
+        { name: 'HTTPD and Networking', url: '/proxying-with-advancednetworking-and-dispatcher.html' }
     ];
 </script>
 </script>

@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pat Lego.com</title>
+<meta name="description" content="Patrique Legault's website, all content relating to him and his work with technology">
+<meta name="keywords" content="Patrique Legault, personal website, portfolio, web development, projects">
+<meta name="author" content="Patrique Legault">
+
+<meta property="og:image" content="assets/social.png" />
+<meta property="og:locale" content="en_US" />
+<meta property="og:image:type" content="image/jpeg" />
+<meta property="og:image:width" content="1080" />
+<meta property="og:image:height" content="1080" />
+<meta property="og:image:alt" content="Pat Legault profile picture" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://www.patlego.com" />
+
+<!-- Include CSS -->
+<link href="../css/tailwind.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<style>
+    body {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+        margin: 0;
+    }
+
+    main {
+        flex: 1;
+    }
+</style>
+
+<!-- Include JS -->
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.7/dist/cdn.min.js"></script>
+    <meta property="og:title" content="AEM as a Cloud Service Dispatcher and Advanced Networking" />
+    <meta property="og:description" content="AEM as a Cloud Service Dispatcher and Advanced Networking" />
+</head>
+
+<body>
+    <div>
+        <!-- Include header -->
+        <header x-data="{ open: false }">
+    <div class="hidden md:flex w-full justify-between items-center p-4 bg-black">
+        <h1 class="text-xl font-bold text-white">Pat Lego.com</h1>
+        <div class="flex-col">
+            <nav>
+                <ul class="flex space-x-4">
+                    <li><a class="hover:text-blue-500 text-white" href="/">Home</a></li>
+                    <li><a class="hover:text-blue-500 text-white" href="/about.html">About</a></li>
+                    <li><a class="hover:text-blue-500 text-white" href="/blogs.html">Blogs</a></li>
+                    <li><a class="hover:text-blue-500 text-white" target="_blank"
+                            href="https://patrique.gumroad.com/l/sslji">Store</a></li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+    <!-- Mobile View -->
+    <div class="flex md:hidden w-full justify-between items-center p-4 bg-black">
+        <h1 class="text-xl font-bold text-white">Pat Lego.com</h1>
+        <button @click="open = !open" class="text-white focus:outline-none">
+            <!-- Icon for mobile menu button -->
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+            </svg>
+        </button>
+    </div>
+
+    <!-- Mobile Menu -->
+    <div x-show="open" class="md:hidden flex flex-col items-end w-full bg-black p-4">
+        <nav>
+            <ul class="flex flex-col space-y-4">
+                <li><a class="hover:text-blue-500 text-white" href="/">Home</a></li>
+                <li><a class="hover:text-blue-500 text-white" href="/about.html">About</a></li>
+                <li><a class="hover:text-blue-500 text-white" href="/blogs.html">Blogs</a></li>
+                <li><a class="hover:text-blue-500 text-white" target="_blank" href="https://patrique.gumroad.com/l/sslji">Store</a></li>
+            </ul>
+        </nav>
+    </div>
+</header>
+    </div>
+
+    <main>
+        <section>
+    <!-- Desktop-->
+    <div class="flex flex-col items-center min-h-screen">
+        <h1 class="font-bold m-1 text-2xl md:text-xl md:m-5 text-center">Leveraging the HTTPD Server to proxy External
+            Requests</h1>
+        <div class="flex flex-col justify-center md:min-h-96 m-5 md:m-1 text-xl w-full md:w-2/3">
+            <p class="m-5">This is most likely not anything new for many of you, any seasoned HTTPD user would know
+                about mod_proxy,
+                but do you know that the HTTPD server in AEMaaCS has the ability to connect to external resources
+                leveraging <a class="underline" target="_blank"
+                    href="https://experienceleague.adobe.com/en/docs/experience-manager-cloud-service/content/security/configuring-advanced-networking">Advanced
+                    Networking</a>?</p>
+
+            <p class="m-5">To make this happen there are a few things you need to do, the first thing is to make sure
+                you have
+                created a network infrastructure. This means that you have decided if you are going to use a flexible,
+                dedicated or VPN based configuration. Each of which has their pros and cons but ultimately it really
+                just depends on your objectives. I would say most settle with the dedicated network infrastructure.
+                Luckily there is a simple self service UI that allows you to create the network infrastructure that you
+                need. The following links show you the steps to set up a network infrastucture in Cloud Manager using
+                the UI.
+            </p>
+            <div class="flex justify-center w-full">
+                <ul>
+                    <li class="text-center"><a target="_blank" class="underline"
+                            href="https://experienceleague.adobe.com/en/docs/experience-manager-learn/cloud-service/networking/flexible-port-egress">Flexible
+                            Network Setup</a></li><var>
+                        <li class="text-center"><a target="_blank" class="underline"
+                                href="https://experienceleague.adobe.com/en/docs/experience-manager-learn/cloud-service/networking/dedicated-egress-ip-address">Dedicated
+                                Network Setup</a></li>
+                        <li class="text-center"><a target="_blank" class="underline"
+                                href="https://experienceleague.adobe.com/en/docs/experience-manager-learn/cloud-service/networking/vpn">Virtual
+                                Private Network Setup</a></li>
+                    </var>
+                </ul>
+            </div>
+
+            <p class="m-5">
+                Now that you have your network infrastructure set up, you can then proceed to configure the advanced
+                networking configuration. Also if you are asking yourself, <span class="italic">"Isn't creating the
+                    network infrastructure
+                    enough?</span>, the answer is no. There are reasons why its not done in a single API call and not to
+                get too technical
+                about it, but the network infrastructure is just the first step in the process. The advanced networking
+                configuration is where you will define the rules that will allow the services to connect to external
+                resources. This <a class="underline"
+                    href="https://developer.adobe.com/experience-cloud/cloud-manager/reference/api/#tag/Environment-Advanced-Networking-Configuration/operation/enableEnvironmentAdvancedNetworkingConfiguration"
+                    target="_blank">API documentation</a> explains what is needed to configure the advanced networking
+                configuration. The API call will define what requests we want to proxy out to the external service. Now
+                if you want to proxy to an HTTP or HTTPS enabled service you do not need to provide a payload to the
+                request. Simply make an empty PUT request to the API. Seeing how this blog focuses on proxying, via the
+                HTTPD server, whihc is mainly for HTTP and HTTPS services the assumption is that an empty PUT requst is
+                all that is needed.
+            </p>
+            <p class="m-5">
+                Congratulations, you now have your network setup and your configuration rules in place to handle the
+                flow of traffic, now all thats left is configuring the VHost to proxy through the networking
+                infrastructure we created. The last part now is to configure your VHost, I will post a sample
+                configuration and then go through the sections of the example explaining its setup.
+            </p>
+            <div class="flex w-full justify-center">
+                <div class="bg-gray-100 rounded-lg shadow-md overflow-auto w-full md:w-2/3">
+                    <code class="language-html">
+                        <ol class="list-decimal list-inside m-4">
+                            <li class="pl-2"># dispatcher/src/rewrites/custom.vars</li>
+                            <li class="pl-2">#</li>
+                            <li class="pl-2"># This file contains the variables defined within a virtual host definition</li>
+                            <li class="pl-2">#</li>
+                            <li class="pl-2"># By default, it is empty and does not define any variable</li>
+                            <li class="pl-2">#</li>
+                            <li class="pl-2">Define EXTERNAL_SERVICE_ENDPOINT services.patlego.com</li>
+                            <li class="pl-2">Define AEM_HTTP_PROXY_HOST localhost</li>
+                            <li class="pl-2">Define AEM_HTTP_PROXY_PORT 3128</li>
+                          </ol>
+                    </code>
+                </div>
+            </div>
+            <div class="flex w-full justify-center mt-5">
+                <div class="bg-gray-100 p-4 rounded-lg shadow-md overflow-auto w-full md:w-2/3">
+                    <code class="language-html">
+                        <div class="list-decimal list-inside">
+                            <div>1. <span class="pl-2"># dispatcher/src/conf.d/available_vhosts/mycustom.vhost</span></div>
+                            <div>2. <span class="pl-2">#</span></div>
+                            <div>3. <span class="pl-2"># This is the default publish virtualhost definition for Apache.</span></div>
+                            <div>4. <span class="pl-2">#</span></div>
+                            <div>5. <span class="pl-2"># DO NOT EDIT this file, your changes will have no impact on your deployment.</span></div>
+                            <div>6. <span class="pl-2">#</span></div>
+                            <div>7. <span class="pl-2"># Instead create a copy in the folder conf.d/available_vhosts and edit the copy.</span></div>
+                            <div>8. <span class="pl-2"># Finally, change to the directory conf.d/enabled_vhosts, remove the symbolic</span></div>
+                            <div>9. <span class="pl-2"># link for default.vhost and create a symbolic link to your copy.</span></div>
+                            <div>10. <span class="pl-2">#</span></div>
+                            <div>11. <span class="pl-2"># Include customer defined variables</span></div>
+                            <div>12. <span class="pl-2">Include conf.d/variables/custom.vars</span></div>
+                            <div>13. <span class="pl-2">&lt;VirtualHost *:80&gt;</span></div>
+                            <div>14. <span class="pl-4">ServerName "dev.aem.com"</span></div>
+                            <div>15. <span class="pl-4">ServerAlias localhost</span></div>
+                            <div>16. <span class="pl-4">SSLProxyEngine on</span></div>
+                            <div>17. <span class="pl-4">ProxyRequests Off</span></div>
+                            <div>18. <span class="pl-4">DocumentRoot "${DOCROOT}"</span></div>
+                            <div>19. <span class="pl-4">&lt;IfModule mod_headers.c&gt;</span></div>
+                            <div>20. <span class="pl-6">Header add X-Vhost "publish"</span></div>
+                            <div>21. <span class="pl-4">&lt;/IfModule&gt;</span></div>
+                            <div>22. <span class="pl-4">&lt;IfDefine EXTERNAL_SERVICE_ENDPOINT&gt;</span></div>
+                            <div>23. <span class="pl-6">ProxyRemoteMatch ".*/api/services/*" "http://${AEM_HTTP_PROXY_HOST}:${AEM_HTTP_PROXY_PORT}"</span></div>
+                            <div>24. <span class="pl-6">&lt;LocationMatch "^/api/services/*$"&gt;</span></div>
+                            <div>25. <span class="pl-8">ProxyPassMatch "https://${EXTERNAL_SERVICE_ENDPOINT}" connectiontimeout=5 timeout=30</span></div>
+                            <div>26. <span class="pl-8">ProxyPassReverse "https://${EXTERNAL_SERVICE_ENDPOINT}" connectiontimeout=5 timeout=30</span></div>
+                            <div>27. <span class="pl-6">&lt;/LocationMatch&gt;</span></div>
+                            <div>28. <span class="pl-4">&lt;/IfDefine&gt;</span></div>
+                            <div>29. <span class="pl-4">&lt;Directory /&gt;</span></div>
+                            <div>30. <span class="pl-6">&lt;IfModule disp_apache2.c&gt;</span></div>
+                            <div>31. <span class="pl-8"># Some items cache with the wrong mime type</span></div>
+                            <div>32. <span class="pl-8"># Use this option to use the name to auto-detect mime types when cached improperly</span></div>
+                            <div>33. <span class="pl-8">ModMimeUsePathInfo On</span></div>
+                            <div>34. <span class="pl-8"># Use this option to avoid cache poisoning</span></div>
+                            <div>35. <span class="pl-8"># Apache will treat that like a directory. This assures the last slash is never stored in cache</span></div>
+                            <div>36. <span class="pl-8">DirectorySlash Off</span></div>
+                            <div>37. <span class="pl-8"># Enable the dispatcher file handler for apache to fetch files from AEM</span></div>
+                            <div>38. <span class="pl-8">SetHandler dispatcher-handler</span></div>
+                            <div>39. <span class="pl-6">&lt;/IfModule&gt;</span></div>
+                            <div>40. <span class="pl-6">Options FollowSymLinks</span></div>
+                            <div>41. <span class="pl-6">AllowOverride None</span></div>
+                            <div>42. <span class="pl-6"># Insert filter</span></div>
+                            <div>43. <span class="pl-6">SetOutputFilter DEFLATE</span></div>
+                            <div>44. <span class="pl-6"># Don't compress images</span></div>
+                            <div>45. <span class="pl-6">SetEnvIfNoCase Request_URI \.(?:gif|jpe?g|png)$ no-gzip dont-vary</span></div>
+                            <div>46. <span class="pl-6"># Prevent clickjacking</span></div>
+                            <div>47. <span class="pl-6">Header always append X-Frame-Options SAMEORIGIN</span></div>
+                            <div>48. <span class="pl-4">&lt;/Directory&gt;</span></div>
+                            <div>49. <span class="pl-4">&lt;Directory "${DOCROOT}"&gt;</span></div>
+                            <div>50. <span class="pl-6">AllowOverride None</span></div>
+                            <div>51. <span class="pl-6">Require all granted</span></div>
+                            <div>52. <span class="pl-4">&lt;/Directory&gt;</span></div>
+                            <div>53. <span class="pl-4">&lt;IfModule disp_apache2.c&gt;</span></div>
+                            <div>54. <span class="pl-6"># Enabled to allow rewrites to take effect and not be ignored by the dispatcher module</span></div>
+                            <div>55. <span class="pl-6">DispatcherUseProcessedURL On</span></div>
+                            <div>56. <span class="pl-6"># Default setting to allow all errors to come from the aem instance</span></div>
+                            <div>57. <span class="pl-6">DispatcherPassError 0</span></div>
+                            <div>58. <span class="pl-4">&lt;/IfModule&gt;</span></div>
+                            <div>59. <span class="pl-4">&lt;/VirtualHost&gt;</span></div>
+                          </div>
+                    </code>
+                </div>
+            </div>
+            <p class="m-5">
+                Analyzing the <span class="italic">custom.vars</span> file we see that we are defining the <span
+                    class="italic">EXTERNAL_SERVICE_ENDPOINT</span> (line 7), which
+                is where the data will be proxied too, we also define the proxy endpoints, <span class="italic">
+                    AEM_HTTP_PROXY_HOST </span> (line 8)
+                and <span class="italic"> AEM_HTTP_PROXY_PORT</span> (line 9). The <span class="italic">
+                    AEM_HTTP_PROXY_HOST </span> and <span class="italic"> AEM_HTTP_PROXY_PORT</span> are the host and
+                port
+                of the proxy server that will be used to proxy the request. Then within the VHost configuration we
+                include the <span class="italic">custom.vars</span> file and then we define the VirtualHost
+                configuration.
+            </p>
+            <p class="m-5">
+                The VirtualHost configuration is pretty standard, but the key part is the <span
+                    class="italic">LocationMatch</span> block (line 24 -
+                26). This block is where we define the proxy rules. The <span class="italic">ProxyPassMatch</span>
+                directive is used to define the
+                URL pattern that we want to proxy. In this case we are proxying all requests that match the pattern
+                /api/services/* to the <span class="italic">EXTERNAL_SERVICE_ENDPOINT</span>. The <span class="italic">
+                    ProxyPassReverse </span> directive is used to rewrite the
+                response headers to match the original request. This is important because the response headers will
+                contain the <span class="italic">EXTERNAL_SERVICE_ENDPOINT</span> and we want to rewrite them to match
+                the original request. The
+                <span class="italic">ProxyRemoteMatch</span> (line 23) directive is used to define the proxy server that
+                will be used to proxy the
+                request. In this case we are using the <span class="italic"> AEM_HTTP_PROXY_HOST </span> and <span
+                    class="italic"> AEM_HTTP_PROXY_PORT</span> that we defined in
+                the <span class="italic">custom.vars</span> file. Since the <span class="italic">ProxyRemoteMatch</span>
+                directive is outside of the <span class="italic">LocationMatch</span> block, it
+                will apply to all requests that match the pattern /api/services/*. This is important because we want all
+                requests that match the pattern /api/services/* to be proxied through the proxy server.
+            </p>
+            <p class="m-5">
+                Since the <span class="italic">EXTERNAL_SERVICE_ENDPOINT</span> is being routed to an HTTPS enabled
+                service, the SSLProxyEngine on
+                (line 16) is needed so that we can perform any necessary SSL handshakes during the proxying process. The
+                ProxyRequests Off (line 17) directive is used to disable the use of the proxy server as a forward proxy
+                server. This is important because we only want to use the proxy server to proxy requests to the
+                <span class="italic">EXTERNAL_SERVICE_ENDPOINT</span> and not as a forward proxy server. The IfDefine
+                <span class="italic">EXTERNAL_SERVICE_ENDPOINT</span>
+                (line 22) directive is used to define the condition that must be met in order for the <span
+                    class="italic">LocationMatch</span>
+                block to be executed. In this case, the condition is that the <span
+                    class="italic">EXTERNAL_SERVICE_ENDPOINT</span> must be defined.
+                If the condition is not met, the <span class="italic">LocationMatch</span> block will not be executed.
+            </p>
+            <p class="m-5">
+                It is always important to include <span class="italic">timeout</span> configurations in your external communication. The <span class="italic">timeout</span>
+                parameter defines how long the connection will wait before it receives data from the service. Once that
+                time period has elapsed the service will then retry the request based on the retry attribute. The
+                <span class="italic">connectiontimeout</span> attribute defines how long the connection will wait before it establishes a connection
+                to the service. This is important because we want to make sure that the connection is established
+                quickly so that the request can be proxied to the service. These parameters can play a big role in how
+                your service performs and how quickly it can respond to requests. Considering how many services are
+                fronted by a CDN which typically timesout after a few seconds we need to make sure that we are able to
+                respond to the request before the CDN times out.
+            </p>
+            <p class="m-5">
+                Lastly it is important to have the proxy directives before the Dispatcher directives. This is because
+                the proxy directives are used to proxy the request to the <span
+                    class="italic">EXTERNAL_SERVICE_ENDPOINT</span> and the Dispatcher
+                directives are used to communicate with the origin, being AEM. We want to prioritize the Proxy
+                directives so that the request is proxied to the <span class="italic">EXTERNAL_SERVICE_ENDPOINT</span>
+                before it is sent to the
+                origin. The HTTPD server will only allow us to communicate with one service at a time, so we need to
+                make sure that the request is sent to the one we want to communicate with first.
+            </p>
+            <p class="m-5">
+                Once you deploy this to your environment, you should be able to see the requests being proxied to the
+                <span class="italic">EXTERNAL_SERVICE_ENDPOINT</span>. You can verify this by looking at the access logs
+                on the HTTPD server. You
+                should see the requests being proxied to the <span class="italic">EXTERNAL_SERVICE_ENDPOINT</span> and
+                the responses being proxied
+                back to the client. Leveraging this feature now allows you to serve content from your external service
+                without having any direct communication with AEM. This means you preserve your AEM instance to only work
+                on requests that it absolutely needs to process and everything else is offloaded the JVM. This is a
+                great way to scale your AEM instance and make sure that it is only processing the requests that it needs
+                to process.
+            </p>
+            <p class="m-5">
+                <a class="text-blue-500 hover:underline bg-gray-200 rounded-full px-2 py-1 inline-block">#aem</a>
+                <a class="text-blue-500 hover:underline bg-gray-200 rounded-full px-2 py-1 inline-block">#httpd</a>
+                <a class="text-blue-500 hover:underline bg-gray-200 rounded-full px-2 py-1 inline-block">#networking</a>
+                <a class="text-blue-500 hover:underline bg-gray-200 rounded-full px-2 py-1 inline-block">#proxies</a>
+            </p>
+        </div>
+    </div>
+</section>
+    </main>
+
+    <!-- Include footer -->
+    <footer class="bg-black text-white p-4">
+    <div class="flex justify-between items-center">
+        <p>&copy; Pat Lego.com</p>
+        <div class="flex items-start space-x-4">
+            <a class="mr-5" href="https://www.linkedin.com/in/patrique-legault" target="_blank">
+                <i class="fab fa-linkedin fa-2x"></i>
+            </a>
+            <a class="pr-5" href="https://twitter.com/_patlego" target="_blank">
+                <i class="fab fa-twitter fa-2x"></i>
+            </a>
+        </div>
+    </div>
+</footer>
+</body>
+
+
+</html>
