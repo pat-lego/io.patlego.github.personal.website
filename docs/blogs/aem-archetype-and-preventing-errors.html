@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pat Lego.com</title>
+<meta name="description" content="Patrique Legault's website, all content relating to him and his work with technology">
+<meta name="keywords" content="Patrique Legault, personal website, portfolio, web development, projects">
+<meta name="author" content="Patrique Legault">
+
+<meta property="og:image" content="assets/social.png" />
+<meta property="og:locale" content="en_US" />
+<meta property="og:image:type" content="image/jpeg" />
+<meta property="og:image:width" content="1080" />
+<meta property="og:image:height" content="1080" />
+<meta property="og:image:alt" content="Pat Legault profile picture" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://www.patlego.com" />
+
+<!-- Include CSS -->
+<link href="../css/tailwind.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<style>
+    body {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+        margin: 0;
+    }
+
+    main {
+        flex: 1;
+    }
+</style>
+
+<!-- Include JS -->
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.7/dist/cdn.min.js"></script>
+    <meta property="og:title" content="AEM Archetype and how it can prevent errors" />
+    <meta property="og:description" content="Leveraging the AEM Archetype to prevent runtime errors" />
+</head>
+
+<body>
+    <div>
+        <!-- Include header -->
+        <header x-data="{ open: false }">
+    <div class="hidden md:flex w-full justify-between items-center p-4 bg-black">
+        <h1 class="text-xl font-bold text-white">Pat Lego.com</h1>
+        <div class="flex-col">
+            <nav>
+                <ul class="flex space-x-4">
+                    <li><a class="hover:text-blue-500 text-white" href="/">Home</a></li>
+                    <li><a class="hover:text-blue-500 text-white" href="/about.html">About</a></li>
+                    <li><a class="hover:text-blue-500 text-white" href="/blogs.html">Blogs</a></li>
+                    <li><a class="hover:text-blue-500 text-white" target="_blank"
+                            href="https://patrique.gumroad.com/l/sslji">Store</a></li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+    <!-- Mobile View -->
+    <div class="flex md:hidden w-full justify-between items-center p-4 bg-black">
+        <h1 class="text-xl font-bold text-white">Pat Lego.com</h1>
+        <button @click="open = !open" class="text-white focus:outline-none">
+            <!-- Icon for mobile menu button -->
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+            </svg>
+        </button>
+    </div>
+
+    <!-- Mobile Menu -->
+    <div x-show="open" class="md:hidden flex flex-col items-end w-full bg-black p-4">
+        <nav>
+            <ul class="flex flex-col space-y-4">
+                <li><a class="hover:text-blue-500 text-white" href="/">Home</a></li>
+                <li><a class="hover:text-blue-500 text-white" href="/about.html">About</a></li>
+                <li><a class="hover:text-blue-500 text-white" href="/blogs.html">Blogs</a></li>
+                <li><a class="hover:text-blue-500 text-white" target="_blank" href="https://patrique.gumroad.com/l/sslji">Store</a></li>
+            </ul>
+        </nav>
+    </div>
+</header>
+    </div>
+
+    <main>
+        <section>
+    <div class="flex flex-col items-center min-h-screen">
+        <h1 class="font-bold m-1 text-2xl md:text-xl md:m-5 text-center">Using the AEM Archetype to create stable AEM
+            packages</h1>
+        <div class="flex flex-col justify-center md:min-h-96 m-5 md:m-1 text-xl w-11/12 md:w-2/3">
+            <p class="m-5">Last week I was pulled into a customer issue where the deployed packages were not installing correctly. I
+                decided to start reviewing the customers codebase, based on some of the initial evidence that was
+                provided to me.</p>
+            
+            <p class="m-5">During my analysis of the codebase I discovered that all of the packages were being deployed to the AEM server, including the <span class="italic">all</span> package. This means that the <span class="italic">ui.apps</span>, <span class="italic">ui.content</span> and <span class="italic">ui.config</span> are being deployed and then being deployed once more via the <span class="italic">all</span> package</p>
+
+            <p class="m-5 break-words">Let me stop there and explain how a package is not "selected" to be deployed, when you see the <span class="italic">&lt;cloudManagerTarget&gt;none&lt;/cloudManagerTarget&gt;</span> in the <a class="hover:text-blue-500" href="https://github.com/adobe/aem-project-archetype/blob/develop/src/main/archetype/ui.apps/pom.xml#L48-L93" target="_blank">pom.xml</a> that's how you know the package will be skipped. This means that when cloud manager looks at the packages it should deploy it will review the properties.xml file within the package and if it sees this property within the file it will not deploy this file. If you wish to mark your package to something that needs to be deployed you can use any other value other then <span class="italic">none</span> or just omit the property.</p>
+
+            <p class="m-5">Now that we know what it takes for a package to be skipped, let me follow up with something else that is very important, you should only be deploying 1 package per project. That package should be the <span class="italic">all</span> package. The <span class="italic">all</span> package is composed package, which means it does not have any content or code its a wrapper for other packages. The following items are typically what are in the <span class="italic">all</span> package</p>
+
+            <div class="flex w-full ml-5 mr-5 mb-5 mt-1 justify-center items-center">
+                <ul>
+                    <li> > ui.apps</li>
+                    <li> > ui.content</li>
+                    <li> > ui.config</li>
+                    <li> > core</li>
+                </ul>
+            </div>
+
+            <p class="m-5">This is very important, notice how we don't have ui.apps.structure even though we see it in the <a class="hover:text-blue-500" href="https://github.com/adobe/aem-project-archetype/tree/develop/src/main/archetype/ui.apps.structure" target="_blank">archetype</a> but its never being embedded in the <a class="hover:text-blue-500" href="https://github.com/adobe/aem-project-archetype/blob/develop/src/main/archetype/all/pom.xml#L51-L218" target="_blank"><span class="italic">all</span></a> package. This means when you decide to embed a package make sure to check what the sample project embeds by default.</p> 
+
+            <p class="m-5">Once we fixed the project structure to properly embed the packages as recommended and prevent the packages from being installed independently the deployment was able to install the <span class="italic">all</span> successfully. This means, when working with multiple packages and OSGi bundles make sure to review the archetype. This is there to show you what AEM is expecting as a project strucutre, deviations from this structure can result in pipeline failures which can delay project timelines.</p>
+        </div>
+        <p class="m-5">
+            <a class="text-blue-500 hover:underline bg-gray-200 rounded-full px-2 py-1 inline-block m-2">#aem</a>
+            <a class="text-blue-500 hover:underline bg-gray-200 rounded-full px-2 py-1 inline-block m-2">#archetype</a>
+            <a class="text-blue-500 hover:underline bg-gray-200 rounded-full px-2 py-1 inline-block m-2">#maven</a>
+            <a class="text-blue-500 hover:underline bg-gray-200 rounded-full px-2 py-1 inline-block m-2">#jcr</a>
+            <a class="text-blue-500 hover:underline bg-gray-200 rounded-full px-2 py-1 inline-block m-2">#packages</a>
+        </p>
+    </div>
+</section>
+    </main>
+
+    <!-- Include footer -->
+    <footer class="bg-black text-white p-4">
+    <div class="flex justify-between items-center">
+        <p>&copy; Pat Lego.com</p>
+        <div class="flex items-start space-x-4">
+            <a class="mr-5" href="https://www.linkedin.com/in/patrique-legault" target="_blank">
+                <i class="fab fa-linkedin fa-2x"></i>
+            </a>
+            <a class="pr-5" href="https://twitter.com/_patlego" target="_blank">
+                <i class="fab fa-twitter fa-2x"></i>
+            </a>
+        </div>
+    </div>
+</footer>
+</body>
+
+
+</html>
