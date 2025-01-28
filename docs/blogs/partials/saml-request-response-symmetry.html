@@ -1,0 +1,80 @@
+<section>
+    <div class="flex flex-col items-center min-h-screen">
+        <h1 class="font-bold m-1 text-2xl md:text-xl md:m-5 text-center">SAML Request Response Symmetry</h1>
+        <div class="flex flex-col justify-center md:min-h-96 m-5 md:m-1 text-xl w-full md:w-2/3">
+            <p class="m-5">I think SAML is probably one of the most complex things to setup in any given application,
+                all the configurations that need to be just right or else the whole thing falls a part. The part that
+                makes it complex is the amount of data that needs to perfectly match between system or else it will
+                fail. Interestingly enough I had a customer who had all the configurations match perfectly between
+                systems but the authentication still failed.</p>
+
+            <p class="m-5">The customer was experiencing the following error:</p>
+            <div class="flex w-full justify-center">
+                <div class="bg-gray-100 rounded-lg shadow-md overflow-auto w-11/12 md:w-full">
+                    <code class="language-html">
+                  msg: [81.236.238.31 [1737995605360] POST /saml_login HTTP/1.1] org.apache.sling.servlets.post.impl.SlingPostServlet org.apache.sling.servlets.post.exceptions.PreconditionViolatedPersistenceException while handling POST on path [/saml_login] with operation [org.apache.sling.servlets.post.impl.operations.ModifyOperation]: Resource at '/saml_login' is not modifiable.
+                </code>
+                </div>
+            </div>
+            <p class="m-5">Now I have been working with AEM for a long time and let me tell you that message is not
+                intuitive. That being said I can help you understand why this message is the key to understanding why
+                this is the reason why the SAML auth is failing. When AEM gets a request to a path it needs to do 2
+                things. The first thing is to authenticate it and the second is to execute the "script" that is linked
+                to that path.</p>
+
+            <p class="m-5">Now for publish instances a lot of the endpoints (i.e paths) are not expecting
+                authentication, the Apache Sling Authentication Service is typically only expecting authentication on a
+                subset of paths. This means is a request to /saml_login comes in but there is no rule in the Apache
+                Sling Authentication Service saying <span class="italic">+/</span> then the path will not require to be
+                authenticated. Note that if the Allow Anonymous Access is checked then the user will not require to be
+                authenticated and be authenticated as the anonymous user.</p>
+            <div class="m-5">
+                <img src="../assets/apache-sling-authentication-service-1.png" alt="Apache Sling Authentication Service"
+                    class="rounded-lg shadow-md w-full">
+            </div>
+
+            <p class="m-5">Now coming back to our customers issue, the endpoint /saml_login as mentioned in the error
+                did not require authentication and allowed the Anonymous User, so that means we get to skip
+                authentication. Meaning the only part left is to execute the script, except what script would execute a
+                POST request to /saml_login? The default one of course! The <a class="hover:text-blue-500 underline"
+                    href="https://github.com/apache/sling-org-apache-sling-servlets-post/blob/master/src/main/java/org/apache/sling/servlets/post/impl/SlingPostServlet.java"
+                    target="_blank">Apache Sling Post Servlet</a> of course! This explains why the Sling Post request
+                processed the request, the saml_login was not handled due to the incorrectly configured Apache Sling
+                Authentication Service which prevented the authentication to even get processed.</p>
+
+            <p class="m-5">Ok, so we fix it, we add the <span class="italic">+/</span> and disable Allow Anonymous
+                Access, and test again.</p>
+
+            <div class="m-5">
+                <img src="https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExc3Rra2h5cjVuMXBja3hreWhqaHk5a2k0MTBzYWNqaWN1OTBoNWlucSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/h0RqHS7X0s6UrXHamM/giphy.gif" alt="Apache Sling Authentication Service"
+                    class="rounded-lg shadow-md w-full">
+            </div>
+
+            <p class="m-5">
+                The test results are in, and it failed. <span class="font-bold">AGAIN</span>
+            </p>
+
+            <p class="m-5">
+                After some examination and careful thinking, I realized that the SAML request was not going back to the initial request. <span class="italic">Spoiler alert this is where the title of this blog starts to make sense.</span>. Let's say you have enabled SAML auth on the following pages
+            </p>
+            <div class="m-5 flex justify-center">
+                <ul>
+                    <li>/content/site_1/pages/login</li>
+                    <li>/content/site_3/pages/login</li>
+                </ul>
+            </div>
+            <p class="m-5">
+                This means that a user goes to <span class="italic">/content/site_1/pages/login</span> and then performs some action that triggers the SAML authentication process. The expectaction is that the SAML response from the IdP (Identity Provider) is to come back to the originating SAML enabled URL with the suffix <span class="italic">/saml_login</span>.  This means that the SAML response should be sent to <span class="italic">/content/site_1/pages/login/saml_login</span>. This is where the symmetry comes in, the SAML response needs to go back to the originating URL and not some other URL.
+            </p>
+            <p class="m-5">
+                Once the necessary changes were made to the IdP to send the response back to the originating request with a suffix of <span class="italic">/saml_login</span> the authentication process worked as expected.
+            </p>
+            <p class="m-5">
+                <a class="text-blue-500 hover:underline bg-gray-200 rounded-full px-2 py-1 inline-block m-2">#aem</a>
+                <a class="text-blue-500 hover:underline bg-gray-200 rounded-full px-2 py-1 inline-block m-2">#sling</a>
+                <a class="text-blue-500 hover:underline bg-gray-200 rounded-full px-2 py-1 inline-block m-2">#saml</a>
+                <a class="text-blue-500 hover:underline bg-gray-200 rounded-full px-2 py-1 inline-block m-2">#authentication</a>
+            </p>
+        </div>
+    </div>
+</section>

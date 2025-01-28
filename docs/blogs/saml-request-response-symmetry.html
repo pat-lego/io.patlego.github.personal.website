@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pat Lego.com</title>
+<meta name="description" content="Patrique Legault's website, all content relating to him and his work with technology">
+<meta name="keywords" content="Patrique Legault, personal website, portfolio, web development, projects">
+<meta name="author" content="Patrique Legault">
+
+<meta property="og:image" content="assets/social.png" />
+<meta property="og:locale" content="en_US" />
+<meta property="og:image:type" content="image/jpeg" />
+<meta property="og:image:width" content="1080" />
+<meta property="og:image:height" content="1080" />
+<meta property="og:image:alt" content="Pat Legault profile picture" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://www.patlego.com" />
+
+<!-- Include CSS -->
+<link href="../css/tailwind.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<style>
+    body {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+        margin: 0;
+    }
+
+    main {
+        flex: 1;
+    }
+</style>
+
+<!-- Include JS -->
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.7/dist/cdn.min.js"></script>
+    <meta property="og:title" content="AEM as a Cloud Service Dispatcher and Advanced Networking" />
+    <meta property="og:description" content="AEM as a Cloud Service Dispatcher and Advanced Networking" />
+</head>
+
+<body>
+    <div>
+        <!-- Include header -->
+        <header x-data="{ open: false }">
+    <div class="hidden md:flex w-full justify-between items-center p-4 bg-black">
+        <h1 class="text-xl font-bold text-white">Pat Lego.com</h1>
+        <div class="flex-col">
+            <nav>
+                <ul class="flex space-x-4">
+                    <li><a class="hover:text-blue-500 text-white" href="/">Home</a></li>
+                    <li><a class="hover:text-blue-500 text-white" href="/about.html">About</a></li>
+                    <li><a class="hover:text-blue-500 text-white" href="/blogs.html">Blogs</a></li>
+                    <li><a class="hover:text-blue-500 text-white" target="_blank"
+                            href="https://patrique.gumroad.com/l/sslji">Store</a></li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+    <!-- Mobile View -->
+    <div class="flex md:hidden w-full justify-between items-center p-4 bg-black">
+        <h1 class="text-xl font-bold text-white">Pat Lego.com</h1>
+        <button @click="open = !open" class="text-white focus:outline-none">
+            <!-- Icon for mobile menu button -->
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+            </svg>
+        </button>
+    </div>
+
+    <!-- Mobile Menu -->
+    <div x-show="open" class="md:hidden flex flex-col items-end w-full bg-black p-4">
+        <nav>
+            <ul class="flex flex-col space-y-4">
+                <li><a class="hover:text-blue-500 text-white" href="/">Home</a></li>
+                <li><a class="hover:text-blue-500 text-white" href="/about.html">About</a></li>
+                <li><a class="hover:text-blue-500 text-white" href="/blogs.html">Blogs</a></li>
+                <li><a class="hover:text-blue-500 text-white" target="_blank" href="https://patrique.gumroad.com/l/sslji">Store</a></li>
+            </ul>
+        </nav>
+    </div>
+</header>
+    </div>
+
+    <main>
+        <section>
+    <div class="flex flex-col items-center min-h-screen">
+        <h1 class="font-bold m-1 text-2xl md:text-xl md:m-5 text-center">SAML Request Response Symmetry</h1>
+        <div class="flex flex-col justify-center md:min-h-96 m-5 md:m-1 text-xl w-full md:w-2/3">
+            <p class="m-5">I think SAML is probably one of the most complex things to setup in any given application,
+                all the configurations that need to be just right or else the whole thing falls a part. The part that
+                makes it complex is the amount of data that needs to perfectly match between system or else it will
+                fail. Interestingly enough I had a customer who had all the configurations match perfectly between
+                systems but the authentication still failed.</p>
+
+            <p class="m-5">The customer was experiencing the following error:</p>
+            <div class="flex w-full justify-center">
+                <div class="bg-gray-100 rounded-lg shadow-md overflow-auto w-11/12 md:w-full">
+                    <code class="language-html">
+                  msg: [81.236.238.31 [1737995605360] POST /saml_login HTTP/1.1] org.apache.sling.servlets.post.impl.SlingPostServlet org.apache.sling.servlets.post.exceptions.PreconditionViolatedPersistenceException while handling POST on path [/saml_login] with operation [org.apache.sling.servlets.post.impl.operations.ModifyOperation]: Resource at '/saml_login' is not modifiable.
+                </code>
+                </div>
+            </div>
+            <p class="m-5">Now I have been working with AEM for a long time and let me tell you that message is not
+                intuitive. That being said I can help you understand why this message is the key to understanding why
+                this is the reason why the SAML auth is failing. When AEM gets a request to a path it needs to do 2
+                things. The first thing is to authenticate it and the second is to execute the "script" that is linked
+                to that path.</p>
+
+            <p class="m-5">Now for publish instances a lot of the endpoints (i.e paths) are not expecting
+                authentication, the Apache Sling Authentication Service is typically only expecting authentication on a
+                subset of paths. This means is a request to /saml_login comes in but there is no rule in the Apache
+                Sling Authentication Service saying <span class="italic">+/</span> then the path will not require to be
+                authenticated. Note that if the Allow Anonymous Access is checked then the user will not require to be
+                authenticated and be authenticated as the anonymous user.</p>
+            <div class="m-5">
+                <img src="../assets/apache-sling-authentication-service-1.png" alt="Apache Sling Authentication Service"
+                    class="rounded-lg shadow-md w-full">
+            </div>
+
+            <p class="m-5">Now coming back to our customers issue, the endpoint /saml_login as mentioned in the error
+                did not require authentication and allowed the Anonymous User, so that means we get to skip
+                authentication. Meaning the only part left is to execute the script, except what script would execute a
+                POST request to /saml_login? The default one of course! The <a class="hover:text-blue-500 underline"
+                    href="https://github.com/apache/sling-org-apache-sling-servlets-post/blob/master/src/main/java/org/apache/sling/servlets/post/impl/SlingPostServlet.java"
+                    target="_blank">Apache Sling Post Servlet</a> of course! This explains why the Sling Post request
+                processed the request, the saml_login was not handled due to the incorrectly configured Apache Sling
+                Authentication Service which prevented the authentication to even get processed.</p>
+
+            <p class="m-5">Ok, so we fix it, we add the <span class="italic">+/</span> and disable Allow Anonymous
+                Access, and test again.</p>
+
+            <div class="m-5">
+                <img src="https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExc3Rra2h5cjVuMXBja3hreWhqaHk5a2k0MTBzYWNqaWN1OTBoNWlucSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/h0RqHS7X0s6UrXHamM/giphy.gif" alt="Apache Sling Authentication Service"
+                    class="rounded-lg shadow-md w-full">
+            </div>
+
+            <p class="m-5">
+                The test results are in, and it failed. <span class="font-bold">AGAIN</span>
+            </p>
+
+            <p class="m-5">
+                After some examination and careful thinking, I realized that the SAML request was not going back to the initial request. <span class="italic">Spoiler alert this is where the title of this blog starts to make sense.</span>. Let's say you have enabled SAML auth on the following pages
+            </p>
+            <div class="m-5 flex justify-center">
+                <ul>
+                    <li>/content/site_1/pages/login</li>
+                    <li>/content/site_3/pages/login</li>
+                </ul>
+            </div>
+            <p class="m-5">
+                This means that a user goes to <span class="italic">/content/site_1/pages/login</span> and then performs some action that triggers the SAML authentication process. The expectaction is that the SAML response from the IdP (Identity Provider) is to come back to the originating SAML enabled URL with the suffix <span class="italic">/saml_login</span>.  This means that the SAML response should be sent to <span class="italic">/content/site_1/pages/login/saml_login</span>. This is where the symmetry comes in, the SAML response needs to go back to the originating URL and not some other URL.
+            </p>
+            <p class="m-5">
+                Once the necessary changes were made to the IdP to send the response back to the originating request with a suffix of <span class="italic">/saml_login</span> the authentication process worked as expected.
+            </p>
+            <p class="m-5">
+                <a class="text-blue-500 hover:underline bg-gray-200 rounded-full px-2 py-1 inline-block m-2">#aem</a>
+                <a class="text-blue-500 hover:underline bg-gray-200 rounded-full px-2 py-1 inline-block m-2">#sling</a>
+                <a class="text-blue-500 hover:underline bg-gray-200 rounded-full px-2 py-1 inline-block m-2">#saml</a>
+                <a class="text-blue-500 hover:underline bg-gray-200 rounded-full px-2 py-1 inline-block m-2">#authentication</a>
+            </p>
+        </div>
+    </div>
+</section>
+    </main>
+
+    <!-- Include footer -->
+    <footer class="bg-black text-white p-4">
+    <div class="flex justify-between items-center">
+        <p>&copy; Pat Lego.com</p>
+        <div class="flex items-start space-x-4">
+            <a class="mr-5" href="https://www.linkedin.com/in/patrique-legault" target="_blank">
+                <i class="fab fa-linkedin fa-2x"></i>
+            </a>
+            <a class="pr-5" href="https://twitter.com/_patlego" target="_blank">
+                <i class="fab fa-twitter fa-2x"></i>
+            </a>
+        </div>
+    </div>
+</footer>
+</body>
+
+
+</html>
