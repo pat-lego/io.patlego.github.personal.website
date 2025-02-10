@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pat Lego.com</title>
+<meta name="description" content="Patrique Legault's website, all content relating to him and his work with technology">
+<meta name="keywords" content="Patrique Legault, personal website, portfolio, web development, projects">
+<meta name="author" content="Patrique Legault">
+
+<meta property="og:image" content="assets/social.png" />
+<meta property="og:locale" content="en_US" />
+<meta property="og:image:type" content="image/jpeg" />
+<meta property="og:image:width" content="1080" />
+<meta property="og:image:height" content="1080" />
+<meta property="og:image:alt" content="Pat Legault profile picture" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://www.patlego.com" />
+
+<!-- Include CSS -->
+<link href="../css/tailwind.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<style>
+    body {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+        margin: 0;
+    }
+
+    main {
+        flex: 1;
+    }
+</style>
+
+<!-- Include JS -->
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.7/dist/cdn.min.js"></script>
+    <meta property="og:title" content="AEM as a Cloud Service Dispatcher and Advanced Networking" />
+    <meta property="og:description" content="AEM as a Cloud Service Dispatcher and Advanced Networking" />
+</head>
+
+<body>
+    <div>
+        <!-- Include header -->
+        <header x-data="{ open: false }">
+    <div class="hidden md:flex w-full justify-between items-center p-4 bg-black">
+        <h1 class="text-xl font-bold text-white">Pat Lego.com</h1>
+        <div class="flex-col">
+            <nav>
+                <ul class="flex space-x-4">
+                    <li><a class="hover:text-blue-500 text-white" href="/">Home</a></li>
+                    <li><a class="hover:text-blue-500 text-white" href="/about.html">About</a></li>
+                    <li><a class="hover:text-blue-500 text-white" href="/blogs.html">Blogs</a></li>
+                    <li><a class="hover:text-blue-500 text-white" target="_blank"
+                            href="https://patrique.gumroad.com/l/sslji">Store</a></li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+    <!-- Mobile View -->
+    <div class="flex md:hidden w-full justify-between items-center p-4 bg-black">
+        <h1 class="text-xl font-bold text-white">Pat Lego.com</h1>
+        <button @click="open = !open" class="text-white focus:outline-none">
+            <!-- Icon for mobile menu button -->
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+            </svg>
+        </button>
+    </div>
+
+    <!-- Mobile Menu -->
+    <div x-show="open" class="md:hidden flex flex-col items-end w-full bg-black p-4">
+        <nav>
+            <ul class="flex flex-col space-y-4">
+                <li><a class="hover:text-blue-500 text-white" href="/">Home</a></li>
+                <li><a class="hover:text-blue-500 text-white" href="/about.html">About</a></li>
+                <li><a class="hover:text-blue-500 text-white" href="/blogs.html">Blogs</a></li>
+                <li><a class="hover:text-blue-500 text-white" target="_blank" href="https://patrique.gumroad.com/l/sslji">Store</a></li>
+            </ul>
+        </nav>
+    </div>
+</header>
+    </div>
+
+    <main>
+        <section>
+    <div class="flex flex-col items-center min-h-screen">
+        <h1 class="font-bold m-1 text-2xl md:text-xl md:m-5 text-center">What is thread starvation?</h1>
+        <div class="flex flex-col justify-center md:min-h-96 m-5 md:m-1 text-xl w-full md:w-2/3">
+            <p class="m-5">If you have never come accross the concept of thread starvation, then I would say count
+                yourself lucky. Thread starvation can happen in any multithreaded application. When it happens it can
+                either cause the system to crash immediately or cause the system to come to a crawl and then crash. That
+                being said it usually ends with the system crashing and burning.</p>
+
+            <p class="m-5">In this blog post we will focus on thread starvation in the JVM. Before we explain thread
+                starvation, let's just first explain something, threads take up memory, no object comes for free, each
+                object has an address in memory, and threads are no exception. Depending on the implementation of the
+                JVM the memory allocated for the JVM thread may come off the heap or its own location outside of heap.
+                Now the objects that the thread spawns may come off of the heap (most implementations are like that) but
+                the stack size that the thread has comes from the Xss setting which defines the stack size. Meaning if a
+                thread has a lot of function calls (recursive algorithms are notorious for that) then the result can
+                cause a StackOverFlow exception, meaning the setting is not set large enough. There is a limit for the
+                number of threads a JVM can have but its relatively high. That being said each thread takes memory and
+                the amount of memory we have is finite, meaning theres a defined limit, its just dependent on the
+                application setup (i.e memory settings). </p>
+
+            <p class="m-5">
+                Now that we've had a quick overview of threads and how they exist in the JVM, let's imagine a scenario.
+                Let's say we have an endpoint that is exposed and does not have any caching layers. This is because it
+                returns customized data and the data is different for each user. When we hit the endpoint it runs a SQL
+                query, meaning it makes a network call, waits for the data, parses it and returns it back to the user.
+                Overtime the dataset that the SQL query executes on grows and becomes more expensive. Similarly overtime
+                the customer base grows and acquires more customers meaning more requests to the endpoint. The endpoint
+                is not optimized for the amount of requests that are coming in and the SQL query is not optimized for
+                the amount of data that is being queried. This means that the endpoint is taking longer to respond to
+                the requests and the threads are waiting for the data to come back. This is where thread starvation
+                comes in, the threads are waiting for the data to come back and the threads are not being released. Now
+                we are starting to develop a serious problem. We are chewing up all of our memory and the system is
+                starting to slow down. Now that we understand how it could happen, let's discuss how to identify the scenario.
+            </p>
+
+            <p class="m-5">As an engineer how would you identify that thread starvation is happening in your JVM? The easiest way I know of doing so is by capturing a set of thread dumps, I like to do 1 to 2 second intervals over 60 seconds. This gives you a minute window overview of what is happening inside of your JVM. Tools such as <a class="italic hover:text-blue-400" href="https://docs.oracle.com/javase/8/docs/technotes/tools/unix/jstack.html" target="_blank">jstack</a> is very useful for capturing such thread dumps. Then take all the thread dumps, unzip them and open all of them in your favorite text editor. Start by reviewing the first thread dump, the one at time 1 second. What you are looking for is a thread that typically has a deep stack trace and is WAITING or RUNNABLE but performing some low level operation. Meaning, its either performing a transaction such as running a query, making a network call, manipulating a dataset. Now if you find that capture the thread id and search your entire set of thread dumps for that thread id and if you see it accross all your thread dumps then you have a slow thread. Thats the first step in identifiying that you have thread starvation. The last thing you need to identify, go back to thread dump at time 1 second, ask yourself this, how many threads do you have? If its high hundreds you are definitely in the red zone, most likely the most promonent thread is your slow thread. Meaning you most likely have a large set of these threads lingering taking up memory. Eventually the JVM will run out of memory, crash and burn and the customers will start getting a 502 Gateway Timeout.</p>
+
+            <p class="m-5">
+                <span class="font-bold">How do you fix it?</span> The answer is its not straight forward, I mean you can go down the easy route and throw money at it and just add more memory but its not solving the problem. What you need to do is ask yourself, am I using the correct topology, can I alter my SQL query to be more efficient, can I cache the data, can I optimize the endpoint to be more efficient. These are the questions you need to ask yourself. The answer is not always easy but its the right way to go about it. Remember, thread starvation is a symptom of a larger problem, its not the problem itself. 
+            </p>
+
+            <p class="m-5">
+                There are various architectures that exist, most CMS systems have caching layers, which prevent many requests from hitting the endpoint. This prevents all of these threads from being spawned and waiting for the data to come back. Other systems use queuing and they only run X jobs at a time and the rest are queued up (spoiler this will be the topic for my next blog post). The point is, there are many ways to solve the problem, you just need to find the right one for your application. 
+            </p>
+            <p class="m-5">
+                <a class="text-blue-500 hover:underline bg-gray-200 rounded-full px-2 py-1 inline-block m-2">#jvm</a>
+                <a class="text-blue-500 hover:underline bg-gray-200 rounded-full px-2 py-1 inline-block m-2">#threads</a>
+                <a class="text-blue-500 hover:underline bg-gray-200 rounded-full px-2 py-1 inline-block m-2">#memory</a>
+                <a class="text-blue-500 hover:underline bg-gray-200 rounded-full px-2 py-1 inline-block m-2">#architecture</a>
+            </p>
+        </div>
+    </div>
+</section>
+    </main>
+
+    <!-- Include footer -->
+    <footer class="bg-black text-white p-4">
+    <div class="flex justify-between items-center">
+        <p>&copy; Pat Lego.com</p>
+        <div class="flex items-start space-x-4">
+            <a class="mr-5" href="https://www.linkedin.com/in/patrique-legault" target="_blank">
+                <i class="fab fa-linkedin fa-2x"></i>
+            </a>
+            <a class="pr-5" href="https://twitter.com/_patlego" target="_blank">
+                <i class="fab fa-twitter fa-2x"></i>
+            </a>
+        </div>
+    </div>
+</footer>
+</body>
+
+
+</html>
