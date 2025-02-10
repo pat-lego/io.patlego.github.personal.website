@@ -1,0 +1,65 @@
+<section>
+    <div class="flex flex-col items-center min-h-screen">
+        <h1 class="font-bold m-1 text-2xl md:text-xl md:m-5 text-center">Why are my workflows not processing?</h1>
+        <div class="flex flex-col justify-center md:min-h-96 m-5 md:m-1 text-xl w-full md:w-2/3">
+            <p class="m-5">
+                Many systems leverage the concept of queueing for job processing. Basically you have a large amount of
+                work that needs to be done and instead of just doing it all at once, we simply queue it up and process X
+                at a time. This is a very common pattern in many systems, especially in CMS systems. The reason for this
+                is that the system can only handle so much work at a time and if you try to do it all at once, you will
+                most likely crash the system. In this blog we will focus on queueing practices implemented in AEM. By
+                the end of this blog you will have a good idea what AEM uses to manage queuing and what to look out for
+                when its not working as you expect.
+            </p>
+
+            <p class="m-5">
+                The common queueing system in AEM is <a class="italic hover:text-blue-400"
+                    href="https://sling.apache.org/documentation/bundles/apache-sling-eventing-and-job-handling.html"
+                    target="_blank">Sling Eventing</a>. These jobs are guaranteed to execute even if the system stops,
+                crashes or restarts. This is a very powerful feature of Sling Eventing.Sling Eventing is used in many
+                places, its how AEM workflows work behind the scenes, when you trigger a
+                workflow it creates a sling job and that will get picked up by the job handler and executed. Now the job
+                handler is an interface that implements the <a
+                    href="https://sling.apache.org/apidocs/sling8/org/apache/sling/event/jobs/consumer/JobConsumer.html"
+                    class="italic hover:text-blue-400" target="_blank">JobConsumer</a> interface. This means that once
+                the job is executed it will do whatever the implementation of the JobConsumer interface dictates. These
+                JobConsumers process jobs on a specific topic and the topic is provided in its implementation. Consider
+                a topic to be a highway where the number of lanes on the highway represent how many jobs can run at the
+                sametime. That means if the highway has 10 lanes then you can run jobs in parallel, a highway with 1
+                lane can only run one job at a time (preserves the order of the jobs). A number of things can cause a
+                sling job to be pushed into a queue, a user uploads an asset. That asset triggers an AEM launcher which
+                in turn triggers a workflow to be created, meaning that a sling job is created and will run the workflow
+                which will in return process the asset. Now each queue has certain properties such as the maximum number
+                of parallel jobs that can be executed (as mentioned above), but above that we also have how many times a
+                job should be retried if it fails. This allows us to implement some fault tolerance into the job
+                processing in case of transient issues.
+            </p>
+
+            <p class="m-5">
+                Now that we have a basic understanding of how sling jobs work, let's discuss why they may not be
+                processing. Presume that one day you see a list of workflows in processing but none of them are moving
+                after a few minutes. Obviously we would check the memory usage, if the Old Gen is maxed out then that
+                would lead to high GC and cause the system to behave very slowly. But let's say that the memory is fine,
+                then what? Check CPU? Assume its fine. Now what? Check the logs, the logs are the best place to start.
+                See if there is something about your workflow payload in the the logs that lead you to believe that the
+                workflow is struggling to run. Nope nothing there either.
+            </p>
+
+            <p class="m-5">
+                Alright then we will have to go down into the JVM, capture some thread dumps, capture one every second
+                for 60 seconds so that you can build a timeline of what is happening in the JVM. A good tool to use when capturing thread dumps is <a href="https://docs.oracle.com/javase/8/docs/technotes/tools/unix/jstack.html" class="italic hover:text-blue-400" target="_blank">jstack</a>,its very easy to automate and works quickly. Once you have your thread dumps, open them all up in your favorite text editor and start reviewing them. What you are looking for is something that has the following in it <span class="italic">/var/workflow/instances/</span>. Now what you would want to do is the following, validate that each thread dump has the same threads in it, meaning that this thread is running consistently over the span of the 60 seconds that the threads were captured. Assuming this is the case, then you need to identify one last thing. Select a random thread dump and count how many threads are running that contain the text <span class="italic">/var/workflow/instances/</span>, once you have that value go check the queue size for the workflow queue. Note that to check the queue size you can simply go to <span class="italic">/system/console/slingevent</span> search for <span class="italic">"com/adobe/granite/workflow/job*"</span>, you will find it under <span class="italic">"Granite Workflow Queue"</span> and then click <span class="italic">"Edit"</span>. This will bring you to that queues configuration window, look for the <span class="italic">Maximum Parallel Jobs</span>. If you see a decimal then this represents the percentage of cores in the CPU that can be used, if its a natural number (an even number like 1,2,3,4,5,6,7,8,9,10) then this represents the number of jobs that can run in parallel. Now, once you've captured the number of parallel jobs that can be executed, compare that to the number of threads you calculated from before, if they are the same then thats your problem. No other jobs can be processed because the queue is full, and the threads are waiting for at least one job to leave so that a new one can enter the queue for processing.
+            </p>
+
+            <p class="m-5">If you find yourself in that situation, restarting AEM won't help you because these jobs are guaranteed to run so on restart the top X jobs will go back into processing and simply cause the queue to fill up once more. There could be multiple reasons why this is happening but the easiest way to stop this is to do the following. Stop the <span class="italic">/system/console/bundles/com.adobe.granite.workflow.core</span> bundle, then referring to your thread dumps delete the node that represents the workflow thread in your thread dumps, they start with <span class="italic">/var/workflow/instances/....</span>. Once all the nodes with those paths are deleted then restart AEM, once the server starts those jobs will not be found in the queue of workflow jobs and for that reason the system will be able to resume processing. </p>
+
+            <p class="m-5"> Now the solution listed above is not ideal but it will unblock the queue and allow for processing to continue, what needs to be addressed after this is the RCA (Root Cause Analysis). Why were those workflows not processable? The answer will lie in the thread dumps that were captured. Some of the basic reasons can be related to an infinite loop in one of the workflow processes, a recursive content set causing content to be processed over and over. No matter the reason it will be made very clear from the thread dumps. The solution will be to identify it and prevent it from happening in the future so that the issue does not happen again.</p>
+
+            <p class="m-5">
+                <a class="text-blue-500 hover:underline bg-gray-200 rounded-full px-2 py-1 inline-block m-2">#aem</a>
+                <a class="text-blue-500 hover:underline bg-gray-200 rounded-full px-2 py-1 inline-block m-2">#sling</a>
+                <a class="text-blue-500 hover:underline bg-gray-200 rounded-full px-2 py-1 inline-block m-2">#workflows</a>
+                <a class="text-blue-500 hover:underline bg-gray-200 rounded-full px-2 py-1 inline-block m-2">#queues</a>
+            </p>
+        </div>
+    </div>
+</section>
