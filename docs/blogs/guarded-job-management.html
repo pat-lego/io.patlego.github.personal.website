@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pat Lego.com</title>
+<meta name="description" content="Patrique Legault's website, all content relating to him and his work with technology">
+<meta name="keywords" content="Patrique Legault, personal website, portfolio, web development, projects">
+<meta name="author" content="Patrique Legault">
+
+<meta property="og:locale" content="en_US" />
+<meta property="og:image:type" content="image/jpeg" />
+<meta property="og:image:alt" content="Pat Legault profile picture" />
+<meta property="og:type" content="website" />
+
+<!-- Include CSS -->
+<link href="../css/tailwind.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<style>
+    body {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+        margin: 0;
+    }
+
+    main {
+        flex: 1;
+    }
+</style>
+
+<!-- Include JS -->
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.7/dist/cdn.min.js"></script>
+    <meta property="og:title" content="Herding Cats: Ordered Job Processing in AEM" />
+    <meta property="og:description" content="A deep dive into Guarded Job Management — a distributed job processing system for AEM that guarantees ordered execution of jobs across multiple instances using cryptographically-signed tokens." />
+    <meta property="og:url" content="https://www.patlego.com/blogs/guarded-job-management.html" />
+    <meta name="image" property="og:image" content="assets/social.png" />
+</head>
+
+<body>
+    <div>
+        <!-- Include header -->
+        <header x-data="{ open: false }">
+    <div class="hidden md:flex w-full justify-between items-center p-4 bg-black">
+        <h1 class="text-xl font-bold text-white">Pat Lego.com</h1>
+        <div class="flex-col">
+            <nav>
+                <ul class="flex space-x-4">
+                    <li><a class="hover:text-blue-500 text-white" href="/">Home</a></li>
+                    <li><a class="hover:text-blue-500 text-white" href="/about.html">About</a></li>
+                    <li><a class="hover:text-blue-500 text-white" href="/blogs.html">Blogs</a></li>
+                    <li><a class="hover:text-blue-500 text-white" target="_blank"
+                            href="https://patrique.gumroad.com/l/sslji">Store</a></li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+    <!-- Mobile View -->
+    <div class="flex md:hidden w-full justify-between items-center p-4 bg-black">
+        <h1 class="text-xl font-bold text-white">Pat Lego.com</h1>
+        <button @click="open = !open" class="text-white focus:outline-none">
+            <!-- Icon for mobile menu button -->
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+            </svg>
+        </button>
+    </div>
+
+    <!-- Mobile Menu -->
+    <div x-show="open" class="md:hidden flex flex-col items-end w-full bg-black p-4">
+        <nav>
+            <ul class="flex flex-col space-y-4">
+                <li><a class="hover:text-blue-500 text-white" href="/">Home</a></li>
+                <li><a class="hover:text-blue-500 text-white" href="/about.html">About</a></li>
+                <li><a class="hover:text-blue-500 text-white" href="/blogs.html">Blogs</a></li>
+                <li><a class="hover:text-blue-500 text-white" target="_blank" href="https://patrique.gumroad.com/l/sslji">Store</a></li>
+            </ul>
+        </nav>
+    </div>
+</header>
+    </div>
+
+    <main>
+        <section>
+    <div class="flex flex-col items-center min-h-screen">
+        <h1 class="font-bold m-1 text-2xl md:text-xl md:m-5 text-center">Herding Cats: Ordered Job Processing in AEM</h1>
+        <div class="flex flex-col justify-center md:min-h-96 m-5 md:m-1 text-xl w-full md:w-2/3">
+            <p class="m-5">
+                Picture this: you've got multiple AEM instances, each cheerfully accepting job requests from eager users. 
+                Jobs are flying in left and right, and somewhere in the chaos, you realize that order <em>matters</em>. 
+                Page A needs to publish before Page B, but Instance 1 got Page B's request 50 milliseconds before Instance 2 
+                got Page A's. Now you've got a race condition, broken dependencies, and a support ticket with your name on it. 
+                Sound familiar? Welcome to the world of distributed job processing — where the only guarantee is that 
+                nothing is guaranteed. Until now.
+            </p>
+
+            <p class="m-5">
+                Enter <a class="italic hover:text-blue-400" href="https://github.com/pat-lego/guarded-job-management" target="_blank">
+                Guarded Job Management</a> — a distributed job processing system for AEM that guarantees <strong>ordered execution</strong> 
+                of jobs, even when they're submitted from multiple machines with network delays that would make carrier pigeons 
+                look reliable. The secret sauce? Cryptographically-signed timestamps with nanosecond precision. When a job arrives 
+                at any AEM instance, it immediately gets stamped with a <em>Guarded Order Token</em> — a tamper-proof ticket that 
+                encodes exactly when that job was born. Think of it as a birth certificate that can't be forged, complete with an 
+                HMAC-SHA256 signature that would make a security auditor weep tears of joy.
+            </p>
+
+            <!-- Architecture Diagram -->
+            <div class="m-5 p-4 md:p-6 bg-gradient-to-br from-slate-900 to-slate-800 rounded-xl shadow-2xl overflow-hidden">
+                <h3 class="text-center text-emerald-400 font-mono font-bold text-sm md:text-base mb-4 md:mb-6">⚡ Architecture Overview</h3>
+                
+                <!-- Mobile Layout (Vertical Flow) -->
+                <div class="flex flex-col md:hidden gap-3">
+                    <!-- HTTP Layer -->
+                    <div class="bg-slate-700/50 rounded-lg p-3 border border-slate-600">
+                        <div class="text-xs text-cyan-400 font-mono mb-2 text-center">HTTP Layer (Any Instance)</div>
+                        <div class="flex justify-center gap-2">
+                            <div class="bg-cyan-900/50 rounded px-2 py-1 text-xs text-cyan-300 font-mono">POST .submit</div>
+                            <div class="bg-cyan-900/50 rounded px-2 py-1 text-xs text-cyan-300 font-mono">GET .status</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Arrow Down -->
+                    <div class="flex justify-center">
+                        <div class="text-amber-400 text-2xl animate-pulse">↓</div>
+                    </div>
+                    
+                    <!-- Token Generation -->
+                    <div class="bg-amber-900/30 rounded-lg p-3 border border-amber-700/50">
+                        <div class="text-xs text-amber-400 font-mono mb-2 text-center">🔐 Token Generation</div>
+                        <div class="text-center">
+                            <code class="text-xs text-amber-200 bg-slate-800 px-2 py-1 rounded">HMAC-SHA256</code>
+                        </div>
+                        <div class="text-xs text-slate-400 text-center mt-1">Nanosecond precision</div>
+                    </div>
+                    
+                    <!-- Arrow Down -->
+                    <div class="flex justify-center">
+                        <div class="text-emerald-400 text-2xl animate-pulse">↓</div>
+                    </div>
+                    
+                    <!-- JCR Storage -->
+                    <div class="bg-emerald-900/30 rounded-lg p-3 border border-emerald-700/50">
+                        <div class="text-xs text-emerald-400 font-mono mb-2 text-center">💾 JCR Persistence</div>
+                        <div class="text-xs text-slate-300 font-mono text-center">/var/guarded-jobs/...</div>
+                        <div class="text-xs text-slate-500 text-center mt-1">Shared across all instances</div>
+                    </div>
+                    
+                    <!-- Arrow Down -->
+                    <div class="flex justify-center">
+                        <div class="text-purple-400 text-2xl animate-pulse">↓</div>
+                    </div>
+                    
+                    <!-- Leader Processing -->
+                    <div class="bg-purple-900/30 rounded-lg p-3 border border-purple-700/50">
+                        <div class="text-xs text-purple-400 font-mono mb-2 text-center">👑 Leader Only</div>
+                        <div class="flex flex-col gap-1 text-xs text-slate-300">
+                            <div class="flex items-center gap-2"><span class="text-purple-400">1.</span> Poll JCR</div>
+                            <div class="flex items-center gap-2"><span class="text-purple-400">2.</span> Sort by token</div>
+                            <div class="flex items-center gap-2"><span class="text-purple-400">3.</span> Execute in order</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Arrow Down -->
+                    <div class="flex justify-center">
+                        <div class="text-rose-400 text-2xl animate-pulse">↓</div>
+                    </div>
+                    
+                    <!-- Job Implementations -->
+                    <div class="bg-rose-900/30 rounded-lg p-3 border border-rose-700/50">
+                        <div class="text-xs text-rose-400 font-mono mb-2 text-center">🔧 Jobs</div>
+                        <div class="flex flex-wrap justify-center gap-1">
+                            <span class="bg-slate-800 rounded px-2 py-0.5 text-xs text-rose-300">replicate</span>
+                            <span class="bg-slate-800 rounded px-2 py-0.5 text-xs text-rose-300">echo</span>
+                            <span class="bg-slate-800 rounded px-2 py-0.5 text-xs text-rose-300">custom...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Desktop Layout (Full Diagram) -->
+                <div class="hidden md:block">
+                    <!-- Row 1: HTTP Layer -->
+                    <div class="bg-slate-700/50 rounded-lg p-4 border border-slate-600 mb-4">
+                        <div class="text-sm text-cyan-400 font-mono mb-3 text-center">HTTP Layer — Any AEM Instance Can Accept Requests</div>
+                        <div class="flex justify-center gap-4">
+                            <div class="bg-cyan-900/40 rounded-lg p-3 border border-cyan-700/50 text-center">
+                                <div class="text-cyan-300 font-mono text-sm font-bold">JobSubmitServlet</div>
+                                <div class="text-cyan-400/70 text-xs mt-1">POST .submit</div>
+                            </div>
+                            <div class="bg-cyan-900/40 rounded-lg p-3 border border-cyan-700/50 text-center">
+                                <div class="text-cyan-300 font-mono text-sm font-bold">JobStatusServlet</div>
+                                <div class="text-cyan-400/70 text-xs mt-1">GET .status</div>
+                            </div>
+                            <div class="bg-cyan-900/40 rounded-lg p-3 border border-cyan-700/50 text-center">
+                                <div class="text-cyan-300 font-mono text-sm font-bold">JobListServlet</div>
+                                <div class="text-cyan-400/70 text-xs mt-1">GET .list</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Arrow -->
+                    <div class="flex justify-center mb-4">
+                        <div class="flex flex-col items-center">
+                            <div class="text-amber-400 text-xl">↓</div>
+                            <div class="text-xs text-amber-400/70 font-mono">generate token</div>
+                        </div>
+                    </div>
+
+                    <!-- Row 2: Middle Section - Token + JCR side by side -->
+                    <div class="flex gap-4 mb-4">
+                        <!-- Token Box -->
+                        <div class="flex-1 bg-amber-900/30 rounded-lg p-4 border border-amber-700/50">
+                            <div class="text-sm text-amber-400 font-mono mb-3 text-center">🔐 Guarded Order Token</div>
+                            <div class="bg-slate-800 rounded p-3 font-mono text-xs">
+                                <div class="text-amber-200 mb-2 break-all">1733325600001234567.kX9mQzR8...</div>
+                                <div class="flex justify-between text-slate-500">
+                                    <span>└── timestamp (ns)</span>
+                                    <span>signature ──┘</span>
+                                </div>
+                            </div>
+                            <div class="flex justify-center gap-3 mt-3 text-xs">
+                                <span class="text-slate-400">✓ Monotonic</span>
+                                <span class="text-slate-400">✓ HMAC-SHA256</span>
+                                <span class="text-slate-400">✓ Tamper-proof</span>
+                            </div>
+                        </div>
+
+                        <!-- JCR Box -->
+                        <div class="flex-1 bg-emerald-900/30 rounded-lg p-4 border border-emerald-700/50">
+                            <div class="text-sm text-emerald-400 font-mono mb-3 text-center">💾 JCR Persistence (Shared Storage)</div>
+                            <div class="bg-slate-800 rounded p-3 font-mono text-xs text-emerald-200">
+                                <div>/var/guarded-jobs/</div>
+                                <div class="ml-4 text-slate-400">└── {sling-id}/</div>
+                                <div class="ml-8 text-slate-500">└── 2024/12/04/{job-uuid}</div>
+                            </div>
+                            <div class="text-center mt-3 text-xs text-slate-400">
+                                Oak Index: <code class="text-emerald-300">gjmGuardedJobIndex</code>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Arrow -->
+                    <div class="flex justify-center mb-4">
+                        <div class="flex flex-col items-center">
+                            <div class="text-purple-400 text-xl">↓</div>
+                            <div class="text-xs text-purple-400/70 font-mono">leader polls every 1s</div>
+                        </div>
+                    </div>
+
+                    <!-- Row 3: Leader Processing -->
+                    <div class="bg-purple-900/30 rounded-lg p-4 border border-purple-700/50 mb-4">
+                        <div class="text-sm text-purple-400 font-mono mb-3 text-center">👑 Leader Instance Only — OrderedJobProcessor</div>
+                        <div class="flex justify-center items-center gap-3">
+                            <div class="bg-slate-800 rounded px-3 py-2 text-center">
+                                <div class="text-purple-300 text-xs font-mono">1. Poll</div>
+                                <div class="text-slate-500 text-xs">Load from JCR</div>
+                            </div>
+                            <div class="text-purple-400">→</div>
+                            <div class="bg-slate-800 rounded px-3 py-2 text-center">
+                                <div class="text-purple-300 text-xs font-mono">2. Sort</div>
+                                <div class="text-slate-500 text-xs">By token timestamp</div>
+                            </div>
+                            <div class="text-purple-400">→</div>
+                            <div class="bg-slate-800 rounded px-3 py-2 text-center">
+                                <div class="text-purple-300 text-xs font-mono">3. Execute</div>
+                                <div class="text-slate-500 text-xs">Per topic (sequential)</div>
+                            </div>
+                            <div class="text-purple-400">→</div>
+                            <div class="bg-slate-800 rounded px-3 py-2 text-center">
+                                <div class="text-purple-300 text-xs font-mono">4. Cleanup</div>
+                                <div class="text-slate-500 text-xs">Delete from JCR</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Arrow -->
+                    <div class="flex justify-center mb-4">
+                        <div class="text-rose-400 text-xl">↓</div>
+                    </div>
+
+                    <!-- Row 4: Jobs -->
+                    <div class="bg-rose-900/30 rounded-lg p-4 border border-rose-700/50">
+                        <div class="text-sm text-rose-400 font-mono mb-3 text-center">🔧 Job Implementations</div>
+                        <div class="flex justify-center gap-4">
+                            <div class="bg-slate-800 rounded-lg p-3 text-center border border-slate-700">
+                                <div class="text-rose-300 font-mono text-sm">ReplicationJob</div>
+                                <div class="text-slate-500 text-xs mt-1">"replicate"</div>
+                            </div>
+                            <div class="bg-slate-800 rounded-lg p-3 text-center border border-slate-700">
+                                <div class="text-rose-300 font-mono text-sm">EchoJob</div>
+                                <div class="text-slate-500 text-xs mt-1">"echo"</div>
+                            </div>
+                            <div class="bg-slate-800 rounded-lg p-3 text-center border border-slate-700 border-dashed">
+                                <div class="text-rose-300 font-mono text-sm">Your Custom</div>
+                                <div class="text-slate-500 text-xs mt-1">Jobs...</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Topics Legend -->
+                <div class="mt-4 md:mt-6 pt-4 border-t border-slate-700">
+                    <div class="text-xs text-slate-400 font-mono text-center mb-2">Topic Isolation — Parallel Across Topics, Sequential Within</div>
+                    <div class="flex flex-wrap justify-center gap-2">
+                        <div class="flex items-center gap-1 bg-slate-800 rounded-full px-3 py-1">
+                            <span class="w-2 h-2 bg-blue-400 rounded-full"></span>
+                            <span class="text-xs text-blue-300 font-mono">"publishing"</span>
+                        </div>
+                        <div class="flex items-center gap-1 bg-slate-800 rounded-full px-3 py-1">
+                            <span class="w-2 h-2 bg-green-400 rounded-full"></span>
+                            <span class="text-xs text-green-300 font-mono">"asset-processing"</span>
+                        </div>
+                        <div class="flex items-center gap-1 bg-slate-800 rounded-full px-3 py-1">
+                            <span class="w-2 h-2 bg-orange-400 rounded-full"></span>
+                            <span class="text-xs text-orange-300 font-mono">"site-a"</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- End Architecture Diagram -->
+
+            <p class="m-5">
+                Here's where it gets clever. All those jobs, scattered across your AEM farm like sheep in a pasture, are 
+                persisted to JCR — the shared storage that all your instances can see. Then, the <strong>cluster leader</strong> 
+                (and only the leader — democracy has no place here) polls for pending jobs, sorts them by their token timestamps, 
+                and processes them in the correct order. Job A arrives on Instance 3 at 10:00:00.001? Job B arrives on Instance 7 
+                at 10:00:00.002? Doesn't matter which instance got what — they'll be processed A → B, as the cosmos intended.
+            </p>
+
+            <p class="m-5">
+                But wait, there's more! Jobs are organized into <strong>topics</strong> — think of them as separate highways where 
+                traffic flows independently. Want all your publishing jobs to run sequentially while asset processing happens 
+                in parallel? Just use different topics. <code>topic: "publishing"</code> and <code>topic: "asset-processing"</code> 
+                run on their own lanes, never blocking each other. And here's the real beauty: topics are created dynamically 
+                from your JSON payload. No configuration files, no restarts, no meetings with the DevOps team. Just send 
+                <code>"topic": "site-a-publishing"</code> and boom — you've got isolation. Send <code>"topic": "publish:/content/site/page-123"</code> 
+                and you've got per-page ordering with maximum parallelism elsewhere.
+            </p>
+
+            <p class="m-5">
+                The system even handles the age-old "jobs arriving in rapid succession" problem with <strong>coalesce timing</strong>. 
+                When jobs pour in faster than a caffeine-fueled content author can click "Publish," the processor waits briefly 
+                (50ms by default) to let them all arrive, then sorts the whole batch by token before processing. It's like 
+                letting everyone get to the starting line before firing the gun — except the starting positions were determined 
+                nanoseconds ago on different continents.
+            </p>
+
+            <p class="m-5">
+                Under the hood, there's a custom Oak index for lightning-fast queries, a dedicated mixin node type (<code>gjm:GuardedJob</code>) 
+                for type-safe storage, and automatic setup via Sling Repository Initializer — because nobody wants to manually 
+                create service users and ACLs in 2024. The built-in <code>ReplicationGuardedJob</code> handles ordered content 
+                replication with synchronous delivery (so you know it actually got there), while <code>EchoJob</code> lets you 
+                test the system without accidentally publishing your CEO's draft blog post.
+            </p>
+
+            <p class="m-5">
+                Is it over-engineered? Maybe. Is it necessary? If you've ever debugged a production issue where "the pages 
+                published in the wrong order" and spent three hours correlating timestamps across five log files, you know 
+                the answer is <strong>absolutely yes</strong>. The code is open source, the documentation is thorough, and the 
+                architecture diagrams use so many ASCII boxes that your terminal will feel right at home. So the next time 
+                someone tells you that distributed job ordering is "basically impossible," point them to this repo and watch 
+                their eyes light up — or glaze over, depending on their relationship with HMAC signatures.
+            </p>
+
+            <p class="m-5">
+                Check out the <a class="italic hover:text-blue-400" href="https://github.com/pat-lego/guarded-job-management" target="_blank">
+                GitHub repository</a> for the full source code, comprehensive documentation, and enough configuration options 
+                to satisfy even the most discerning architect. Your future self, debugging at 2 AM, will thank you.
+            </p>
+
+            <p class="m-5">
+                <a class="text-blue-500 hover:underline bg-gray-200 rounded-full px-2 py-1 inline-block m-2">#aem</a>
+                <a class="text-blue-500 hover:underline bg-gray-200 rounded-full px-2 py-1 inline-block m-2">#distributed-systems</a>
+                <a class="text-blue-500 hover:underline bg-gray-200 rounded-full px-2 py-1 inline-block m-2">#job-processing</a>
+                <a class="text-blue-500 hover:underline bg-gray-200 rounded-full px-2 py-1 inline-block m-2">#open-source</a>
+                <a class="text-blue-500 hover:underline bg-gray-200 rounded-full px-2 py-1 inline-block m-2">#sling</a>
+            </p>
+        </div>
+    </div>
+</section>
+
+
+    </main>
+
+    <!-- Include footer -->
+    <footer class="bg-black text-white p-4">
+    <div class="flex justify-between items-center">
+        <p>&copy; Pat Lego.com</p>
+        <div class="flex items-start space-x-4">
+            <a class="mr-5" href="https://www.linkedin.com/in/patrique-legault" target="_blank">
+                <i class="fab fa-linkedin fa-2x"></i>
+            </a>
+            <a class="pr-5" href="https://twitter.com/_patlego" target="_blank">
+                <i class="fab fa-twitter fa-2x"></i>
+            </a>
+        </div>
+    </div>
+</footer>
+</body>
+
+
+</html>
+
