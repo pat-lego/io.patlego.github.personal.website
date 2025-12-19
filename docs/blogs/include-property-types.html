@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pat Lego.com</title>
+<meta name="description" content="Patrique Legault's website, all content relating to him and his work with technology">
+<meta name="keywords" content="Patrique Legault, personal website, portfolio, web development, projects">
+<meta name="author" content="Patrique Legault">
+
+<meta property="og:locale" content="en_US" />
+<meta property="og:image:type" content="image/jpeg" />
+<meta property="og:image:alt" content="Pat Legault profile picture" />
+<meta property="og:type" content="website" />
+
+<!-- Include CSS -->
+<link href="../css/tailwind.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<style>
+    body {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+        margin: 0;
+    }
+
+    main {
+        flex: 1;
+    }
+</style>
+
+<!-- Include JS -->
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.7/dist/cdn.min.js"></script>
+    <meta property="og:title" content="Understanding includePropertyTypes in AEM Lucene Indexes" />
+    <meta property="og:description" content="How includePropertyTypes affects full text query results with CONTAINS in JCR-SQL2" />
+    <meta property="og:url" content="https://www.patlego.com/blogs/include-property-types.html" />
+</head>
+
+<body>
+    <div>
+        <!-- Include header -->
+        <header x-data="{ open: false }">
+    <div class="hidden md:flex w-full justify-between items-center p-4 bg-black">
+        <h1 class="text-xl font-bold text-white">Pat Lego.com</h1>
+        <div class="flex-col">
+            <nav>
+                <ul class="flex space-x-4">
+                    <li><a class="hover:text-blue-500 text-white" href="/">Home</a></li>
+                    <li><a class="hover:text-blue-500 text-white" href="/about.html">About</a></li>
+                    <li><a class="hover:text-blue-500 text-white" href="/blogs.html">Blogs</a></li>
+                    <li><a class="hover:text-blue-500 text-white" target="_blank"
+                            href="https://patrique.gumroad.com/l/sslji">Store</a></li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+    <!-- Mobile View -->
+    <div class="flex md:hidden w-full justify-between items-center p-4 bg-black">
+        <h1 class="text-xl font-bold text-white">Pat Lego.com</h1>
+        <button @click="open = !open" class="text-white focus:outline-none">
+            <!-- Icon for mobile menu button -->
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+            </svg>
+        </button>
+    </div>
+
+    <!-- Mobile Menu -->
+    <div x-show="open" class="md:hidden flex flex-col items-end w-full bg-black p-4">
+        <nav>
+            <ul class="flex flex-col space-y-4">
+                <li><a class="hover:text-blue-500 text-white" href="/">Home</a></li>
+                <li><a class="hover:text-blue-500 text-white" href="/about.html">About</a></li>
+                <li><a class="hover:text-blue-500 text-white" href="/blogs.html">Blogs</a></li>
+                <li><a class="hover:text-blue-500 text-white" target="_blank" href="https://patrique.gumroad.com/l/sslji">Store</a></li>
+            </ul>
+        </nav>
+    </div>
+</header>
+    </div>
+
+    <main>
+        <section>
+    <div class="flex flex-col items-center min-h-screen">
+        <h1 class="font-bold m-3 text-xl md:text-2xl md:m-5 text-center">Understanding includePropertyTypes in AEM Lucene Indexes</h1>
+        <div class="flex flex-col justify-center md:min-h-96 m-3 md:m-5 text-base md:text-xl w-11/12 md:w-2/3">
+            <p class="m-5">
+                When working with full text search in AEM, understanding how your Lucene index is configured can mean the difference between queries that return expected results and queries that mysteriously return nothing. One of the most impactful configuration options is <span class="italic">includePropertyTypes</span>, which controls exactly which JCR property types get indexed for full text search.
+            </p>
+
+            <p class="m-5">
+                In AEM, the underlying content repository (Apache Jackrabbit Oak) uses Lucene indexes to power both property-based queries and full text search. When you execute a JCR-SQL2 query using the <span class="italic">CONTAINS</span> function, you are performing a full text query. This means the query engine searches against the full text index, not individual property values. The <a class="hover:text-blue-500 underline" href="https://jackrabbit.apache.org/oak/docs/query/lucene.html" target="_blank">Apache Jackrabbit Oak Lucene documentation</a> provides comprehensive details on how these indexes work.
+            </p>
+
+            <p class="m-5">
+                Consider a query like the following:
+            </p>
+
+            <div class="flex w-full ml-5 mr-5 mb-5 mt-1 justify-center items-center">
+                <pre class="bg-gray-100 p-4 rounded-lg overflow-x-auto text-base"><code>SELECT * FROM [dam:Asset] WHERE CONTAINS(., 'december') AND ISDESCENDANTNODE("/content/dam") option(limit 100)</code></pre>
+            </div>
+
+            <p class="m-5">
+                This query uses <span class="italic">CONTAINS(., 'december')</span> to search for the term "december" across all indexed properties of the node. The dot (<span class="italic">.</span>) represents the node scope, meaning all properties that have been indexed with <span class="italic">nodeScopeIndex = true</span> will be searched, as well as any aggregated child nodes defined in the index configuration. This is fundamentally different from a property equality check like <span class="italic">WHERE [title] = 'december'</span>.
+            </p>
+
+            <p class="m-5">
+                Now, here's where <span class="italic">includePropertyTypes</span> becomes critical. This property is defined at the indexing rule level and specifies which JCR property types should be included in the full text index. The most common configuration looks like this:
+            </p>
+
+            <div class="flex w-full ml-5 mr-5 mb-5 mt-1 justify-center items-center">
+                <pre class="bg-gray-100 p-4 rounded-lg overflow-x-auto text-base w-full md:w-3/4"><code>/oak:index/myIndex
+  - jcr:primaryType = "oak:QueryIndexDefinition"
+  - type = "lucene"
+  - compatVersion = 2
+  - async = "async"
+  + indexRules
+    + app:Asset
+      - includePropertyTypes = ["String", "Binary"]
+      + properties
+        + allProps
+          - name = ".*"
+          - isRegexp = true
+          - nodeScopeIndex = true</code></pre>
+            </div>
+
+            <p class="m-5">
+                In this example, <span class="italic">includePropertyTypes = ["String", "Binary"]</span> means that only properties of type String and Binary will be indexed for full text search. This is actually the recommended approach for most use cases because it significantly reduces index size while still capturing the majority of searchable content. Binary properties are important because they allow text extraction from files like PDFs and Word documents.
+            </p>
+
+            <p class="m-5">
+                But what happens when you need to search for values that are stored in other property types? Consider a scenario where you have a property storing a Long value like a year (<span class="italic">jcr:content/metadata/year = 2024</span>). If your index only includes String and Binary types, a <span class="italic">CONTAINS</span> query searching for "2024" will not find this node, even though the value exists. This is because the Long property was never indexed in the first place.
+            </p>
+
+            <p class="m-5">
+                If you need to include additional property types, you can expand the configuration:
+            </p>
+
+            <div class="flex w-full ml-5 mr-5 mb-5 mt-1 justify-center items-center">
+                <pre class="bg-gray-100 p-4 rounded-lg overflow-x-auto text-base w-full md:w-3/4"><code>+ app:Asset
+  - includePropertyTypes = ["String", "Binary", "Long", "Date"]
+  + properties
+    + allProps
+      - name = ".*"
+      - isRegexp = true
+      - nodeScopeIndex = true</code></pre>
+            </div>
+
+            <p class="m-5">
+                However, be cautious when expanding <span class="italic">includePropertyTypes</span>. Each additional property type increases the index size and reindexing time. Since Lucene indexes are stored in the blob store, larger indexes also mean higher storage costs. Keeping your index lean by limiting <span class="italic">includePropertyTypes</span> to only what you need can result in meaningful cost savings, especially for large repositories. For most AEM implementations, sticking with String and Binary is sufficient. If you need to query specific non-string properties, consider creating explicit property definitions with <span class="italic">propertyIndex = true</span> instead of relying on full text search.
+            </p>
+
+            <p class="m-5">
+                A common troubleshooting pattern I've seen is when customers upgrade or migrate their AEM instance and suddenly their full text queries stop returning expected results. The culprit is often a missing or misconfigured <span class="italic">includePropertyTypes</span> setting. Always verify your index definitions include the property types you expect to search against.
+            </p>
+
+            <p class="m-5">
+                To summarize the key takeaways:
+            </p>
+
+            <div class="flex w-full ml-5 mr-5 mb-5 mt-1 justify-center items-center">
+                <ul class="list-disc ml-5">
+                    <li class="mb-2"><span class="italic">CONTAINS</span> in JCR-SQL2 performs full text queries against the Lucene index</li>
+                    <li class="mb-2"><span class="italic">includePropertyTypes</span> controls which property types get indexed for full text search</li>
+                    <li class="mb-2">Properties not matching the included types will not appear in <span class="italic">CONTAINS</span> query results</li>
+                    <li class="mb-2">String and Binary are the most common types to include</li>
+                    <li class="mb-2">Balance between search coverage and index performance when configuring property types</li>
+                </ul>
+            </div>
+
+            <p class="m-5">
+                For more detailed information on Lucene index configuration in Oak, refer to the official <a class="hover:text-blue-500 underline" href="https://jackrabbit.apache.org/oak/docs/query/lucene.html" target="_blank">Apache Jackrabbit Oak Lucene Index documentation</a>.
+            </p>
+
+            <p class="m-5">
+                <a class="text-blue-500 hover:underline bg-gray-200 rounded-full px-2 py-1 inline-block m-2">#aem</a>
+                <a class="text-blue-500 hover:underline bg-gray-200 rounded-full px-2 py-1 inline-block m-2">#oak</a>
+                <a class="text-blue-500 hover:underline bg-gray-200 rounded-full px-2 py-1 inline-block m-2">#lucene</a>
+                <a class="text-blue-500 hover:underline bg-gray-200 rounded-full px-2 py-1 inline-block m-2">#jcr</a>
+                <a class="text-blue-500 hover:underline bg-gray-200 rounded-full px-2 py-1 inline-block m-2">#indexing</a>
+            </p>
+        </div>
+    </div>
+</section>
+
+
+    </main>
+
+    <!-- Include footer -->
+    <footer class="bg-black text-white p-4">
+    <div class="flex justify-between items-center">
+        <p>&copy; Pat Lego.com</p>
+        <div class="flex items-start space-x-4">
+            <a class="mr-5" href="https://www.linkedin.com/in/patrique-legault" target="_blank">
+                <i class="fab fa-linkedin fa-2x"></i>
+            </a>
+            <a class="pr-5" href="https://twitter.com/_patlego" target="_blank">
+                <i class="fab fa-twitter fa-2x"></i>
+            </a>
+        </div>
+    </div>
+</footer>
+</body>
+
+
+</html>
+
