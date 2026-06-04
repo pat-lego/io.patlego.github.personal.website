@@ -129,7 +129,7 @@
         document.location.href = `/blogs${url}`;
     };
     function loadBlog(e) {
-        fetch(`/blogs/partials/${e.url}`)
+        fetch(`/blogs/partials${e.url}`)
             .then(response => {
                 if (!response.ok) {
                     throw new Error('Network response was not ok ' + response.statusText);
@@ -170,13 +170,14 @@
     };
     const blogs = [
         { name: 'Git Init', url: '/blog-1.html' },
-        { name: 'Herding Cats: Ordered Job Processing', url: '/guarded-job-management.html' },
-        { name: 'HTTPD and Networking', url: '/proxying-with-advancednetworking-and-dispatcher.html' },
-        { name: 'includePropertyTypes in AEM Indexes', url: '/include-property-types.html' },
-        { name: 'Review the AEM Archetype', url: '/aem-archetype-and-preventing-errors.html' },
-        { name: 'SAML Symmetry', url: '/saml-request-response-symmetry.html' },
-        { name: 'Thread starvation?', url: '/what-is-thread-starvation.html' },
-        { name: 'Where is my workflow?', url: '/queueing-and-processing.html' }  
+        // { name: 'Herding Cats: Ordered Job Processing', url: '/guarded-job-management.html' },
+        // { name: 'HTTPD and Networking', url: '/proxying-with-advancednetworking-and-dispatcher.html' },
+        // { name: 'includePropertyTypes in AEM Indexes', url: '/include-property-types.html' },
+        // { name: 'Review the AEM Archetype', url: '/aem-archetype-and-preventing-errors.html' },
+        // { name: 'SAML Symmetry', url: '/saml-request-response-symmetry.html' },
+        // { name: 'Thread starvation?', url: '/what-is-thread-starvation.html' },
+        // { name: 'Where is my workflow?', url: '/queueing-and-processing.html' },
+        { name: 'Asynchronous Deadlock', url: '/always-provide-an-executor.html' }  
     ];
 </script>
 </script>

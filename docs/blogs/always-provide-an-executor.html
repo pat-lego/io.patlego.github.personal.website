@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pat Lego.com</title>
+<meta name="description" content="Patrique Legault's website, all content relating to him and his work with technology">
+<meta name="keywords" content="Patrique Legault, personal website, portfolio, web development, projects">
+<meta name="author" content="Patrique Legault">
+
+<meta property="og:locale" content="en_US" />
+<meta property="og:image:type" content="image/jpeg" />
+<meta property="og:image:alt" content="Pat Legault profile picture" />
+<meta property="og:type" content="website" />
+
+<!-- Include CSS -->
+<link href="../css/tailwind.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<style>
+    body {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+        margin: 0;
+    }
+
+    main {
+        flex: 1;
+    }
+</style>
+
+<!-- Include JS -->
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.7/dist/cdn.min.js"></script>
+    <meta property="og:title" content="Asynchronous Java code in AEM" />
+    <meta property="og:description" content="Asynchronous Java code in " />
+    <meta property="og:url" content="https://www.patlego.com/blogs/aem-archetype-and-preventing-errors.html" />
+</head>
+
+<body>
+    <div>
+        <!-- Include header -->
+        <header x-data="{ open: false }">
+    <div class="hidden md:flex w-full justify-between items-center p-4 bg-black">
+        <h1 class="text-xl font-bold text-white">Pat Lego.com</h1>
+        <div class="flex-col">
+            <nav>
+                <ul class="flex space-x-4">
+                    <li><a class="hover:text-blue-500 text-white" href="/">Home</a></li>
+                    <li><a class="hover:text-blue-500 text-white" href="/about.html">About</a></li>
+                    <li><a class="hover:text-blue-500 text-white" href="/blogs.html">Blogs</a></li>
+                    <li><a class="hover:text-blue-500 text-white" target="_blank"
+                            href="https://patrique.gumroad.com/l/sslji">Store</a></li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+    <!-- Mobile View -->
+    <div class="flex md:hidden w-full justify-between items-center p-4 bg-black">
+        <h1 class="text-xl font-bold text-white">Pat Lego.com</h1>
+        <button @click="open = !open" class="text-white focus:outline-none">
+            <!-- Icon for mobile menu button -->
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+            </svg>
+        </button>
+    </div>
+
+    <!-- Mobile Menu -->
+    <div x-show="open" class="md:hidden flex flex-col items-end w-full bg-black p-4">
+        <nav>
+            <ul class="flex flex-col space-y-4">
+                <li><a class="hover:text-blue-500 text-white" href="/">Home</a></li>
+                <li><a class="hover:text-blue-500 text-white" href="/about.html">About</a></li>
+                <li><a class="hover:text-blue-500 text-white" href="/blogs.html">Blogs</a></li>
+                <li><a class="hover:text-blue-500 text-white" target="_blank" href="https://patrique.gumroad.com/l/sslji">Store</a></li>
+            </ul>
+        </nav>
+    </div>
+</header>
+    </div>
+
+    <main>
+        <section>
+    <div class="flex flex-col items-center min-h-screen">
+        <h1 class="font-bold m-1 text-2xl md:text-xl md:m-5 text-center">
+            Executors: Asynchronous processing and defaults
+        </h1>
+
+        <div class="flex flex-col justify-center md:min-h-96 m-5 md:m-1 text-xl w-full md:w-2/3">
+
+            <p class="m-5">
+                Developing with asynchronous processes in Java is a powerful feature, but understanding what it is doing
+                behind the scenes is something we quickly forget. When we develop using
+                <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/CompletableFuture.html">CompletableFuture</a>,
+                we provide the necessary lambda function to execute in the background.
+            </p>
+
+            <p class="m-5">
+                The question is: what happens to that function after it starts to execute? The answer is
+                <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/Executors.html">Executors</a>.
+                When we run the lambda asynchronously without a provided executor, we run the lambda in a common pool
+                (also known as the <code>ForkJoinPool.commonPool()</code>) which has a default size of
+                <em># of processors - 1</em>. This means that if you have 10 cores then you would be able to run
+                9 threads in parallel. The common pool cannot be changed or mutated — it is provided by the JVM
+                for shared usage.
+            </p>
+
+            <p class="m-5">
+                Now here is a hypothetical: let's say a burst of lambda functions run saturating the Common Pool.
+                That would not normally be seen as a bad thing, unless those lambdas are waiting for a response
+                from a separate lambda that also runs in the common pool. With this we have exposed a deadlock with
+                asynchronous processing. All threads in the common pool are waiting for threads to provide a result,
+                but the threads that are to provide the result also run in the common pool and will never receive
+                CPU time to do so. This can be seen in the thread dump below, where we have 9 Common Pool threads
+                that are BLOCKED, preventing any other threads from being executed in the Common Pool.
+            </p>
+
+            <p class="m-5">
+                How do we prevent this from happening? Provide an Executor to avoid using the Common Pool. We can
+                leverage the following
+                <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/CompletableFuture.html#runAsync(java.lang.Runnable,java.util.concurrent.Executor)" style="text-decoration: underline;">API</a>.
+                This allows threads to run within their own pool, preventing them from consuming slots in the
+                Common Pool.
+            </p>
+
+            <p class="m-5 font-semibold text-red-500">
+                ❌ Without an Executor — runs in the Common Pool (dangerous)
+            </p>
+            <div class="mx-5 overflow-x-auto">
+                <pre class="bg-gray-900 text-green-400 font-mono text-sm p-4 rounded-lg leading-relaxed"><code>// No executor provided — CompletableFuture uses ForkJoinPool.commonPool()
+// All tasks share the same fixed-size pool (# processors - 1 threads)
+// If these tasks wait on each other, the pool deadlocks
+
+CompletableFuture&lt;String&gt; outer = CompletableFuture.supplyAsync(() -&gt; {
+    // This task runs in the Common Pool and then waits for inner to finish
+    CompletableFuture&lt;String&gt; inner = CompletableFuture.supplyAsync(() -&gt; {
+        // This also runs in the Common Pool — but all slots may already be taken
+        return fetchDataFromElastic();
+    });
+    return inner.join(); // DEADLOCK: outer holds a pool thread waiting for inner,
+                         // but inner can never get a pool thread to run
+});</code></pre>
+            </div>
+
+            <p class="m-5 font-semibold text-green-500">
+                ✅ With a dedicated Executor — isolated from the Common Pool (safe)
+            </p>
+            <div class="mx-5 overflow-x-auto">
+                <pre class="bg-gray-900 text-green-400 font-mono text-sm p-4 rounded-lg leading-relaxed"><code>// Dedicated thread pool — completely separate from ForkJoinPool.commonPool()
+// Size it based on your workload: I/O-bound tasks can use more threads than CPU cores
+ExecutorService executor = Executors.newFixedThreadPool(10);
+
+CompletableFuture&lt;String&gt; outer = CompletableFuture.supplyAsync(() -&gt; {
+    // Runs in the dedicated executor, not the Common Pool
+    CompletableFuture&lt;String&gt; inner = CompletableFuture.supplyAsync(() -&gt; {
+        // Also runs in the dedicated executor — has its own available threads
+        return fetchDataFromElastic();
+    }, executor);
+    return inner.join(); // Safe: inner can always acquire a thread from the pool
+}, executor);
+
+// Always shut down the executor when the component is deactivated
+executor.shutdown();</code></pre>
+            </div>
+
+            <div class="m-5 overflow-x-auto">
+                <pre class="bg-gray-900 text-green-400 font-mono text-sm p-4 rounded-lg leading-relaxed"><code>"ForkJoinPool.commonPool-worker-9" #377 [15559] daemon prio=5 os_prio=0 cpu=16012.13ms elapsed=28557.79s tid=0x000055d7d56660e0 nid=15559 waiting on condition [0x00007fb0e67e5000]
+   java.lang.Thread.State: TIMED_WAITING (parking)
+        at jdk.internal.misc.Unsafe.park(java.base@21.0.10/Native Method)
+        - parking to wait for &lt;0x00000006457777a0&gt; (a java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject)
+        at java.util.concurrent.locks.LockSupport.parkNanos(java.base@21.0.10/LockSupport.java:269)
+        at java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.awaitNanos(java.base@21.0.10/AbstractQueuedSynchronizer.java:1763)
+        at java.util.concurrent.LinkedBlockingQueue.poll(java.base@21.0.10/LinkedBlockingQueue.java:460)
+        at org.apache.jackrabbit.oak.plugins.index.elastic.query.async.ElasticResultRowAsyncIterator.hasNext(ElasticResultRowAsyncIterator.java:134)
+        at org.apache.jackrabbit.oak.plugins.index.search.spi.query.FulltextIndex$FulltextPathCursor$1.hasNext(FulltextIndex.java:461)
+        at org.apache.commons.collections4.iterators.FilterIterator.setNextObject(FilterIterator.java:165)
+        at org.apache.commons.collections4.iterators.FilterIterator.hasNext(FilterIterator.java:105)
+        at org.apache.jackrabbit.oak.plugins.index.cursor.PathCursor.hasNext(PathCursor.java:68)
+        at org.apache.jackrabbit.oak.plugins.index.search.spi.query.FulltextIndex$FulltextPathCursor.hasNext(FulltextIndex.java:499)
+        at org.apache.jackrabbit.oak.query.ast.SelectorImpl.nextInternal(SelectorImpl.java:529)
+        at org.apache.jackrabbit.oak.query.ast.SelectorImpl.next(SelectorImpl.java:522)
+        at org.apache.jackrabbit.oak.query.QueryImpl$RowIterator.fetchNext(QueryImpl.java:933)
+        at org.apache.jackrabbit.oak.query.QueryImpl$RowIterator.hasNext(QueryImpl.java:960)
+        at org.apache.jackrabbit.oak.jcr.query.QueryResultImpl$1.fetch(QueryResultImpl.java:103)
+        at org.apache.jackrabbit.oak.jcr.query.QueryResultImpl$1.&lt;init&gt;(QueryResultImpl.java:99)
+        at org.apache.jackrabbit.oak.jcr.query.QueryResultImpl.getRows(QueryResultImpl.java:83)
+        at com.enterprise.cms.core.models.search.utils.SearchQueryExecutorImpl.executeQuery(SearchQueryExecutorImpl.java:56)
+        at com.enterprise.cms.core.models.search.SRMFactory.getProductDocuments(SRMFactory.java:28)
+        at com.enterprise.cms.core.models.ManagingModel.addDocuments(ManagingModel.java:617)
+        at com.enterprise.cms.core.models.ManagingModel.createShareClassJson(ManagingModel.java:236)
+        at com.enterprise.cms.core.models.ManagingModel.addShareClasses(ManagingModel.java:285)
+        at com.enterprise.cms.core.models.ManagingModel.getJson(ManagingModel.java:188)
+        at com.enterprise.cms.core.servlets.PLPDocumentsServlet.lambda$getJson$0(PLPDocumentsServlet.java:14)
+        - locked &lt;0x0000000645248a88&gt; (a com.google.gson.JsonArray)
+        at com.enterprise.cms.core.servlets.PLPDocumentsServlet$$Lambda/0x00000008022911f0.run(Unknown Source)
+        at java.util.concurrent.CompletableFuture$AsyncRun.run(java.base@21.0.10/CompletableFuture.java:1804)
+        at java.util.concurrent.CompletableFuture$AsyncRun.exec(java.base@21.0.10/CompletableFuture.java:1796)
+        at java.util.concurrent.ForkJoinTask.doExec(java.base@21.0.10/ForkJoinTask.java:387)
+        at java.util.concurrent.ForkJoinPool$WorkQueue.topLevelExec(java.base@21.0.10/ForkJoinPool.java:1310)
+        at java.util.concurrent.ForkJoinPool.scan(java.base@21.0.10/ForkJoinPool.java:1841)
+        at java.util.concurrent.ForkJoinPool.runWorker(java.base@21.0.10/ForkJoinPool.java:1806)
+        at java.util.concurrent.ForkJoinWorkerThread.run(java.base@21.0.10/ForkJoinWorkerThread.java:188)</code></pre>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+    </main>
+
+    <!-- Include footer -->
+    <footer class="bg-black text-white p-4">
+    <div class="flex justify-between items-center">
+        <p>&copy; Pat Lego.com</p>
+        <div class="flex items-start space-x-4">
+            <a class="mr-5" href="https://www.linkedin.com/in/patrique-legault" target="_blank">
+                <i class="fab fa-linkedin fa-2x"></i>
+            </a>
+            <a class="pr-5" href="https://twitter.com/_patlego" target="_blank">
+                <i class="fab fa-twitter fa-2x"></i>
+            </a>
+        </div>
+    </div>
+</footer>
+</body>
+
+
+</html>
