@@ -598,9 +598,6 @@ video {
 .min-h-screen {
   min-height: 100vh;
 }
-.w-1\/2 {
-  width: 50%;
-}
 .w-1\/5 {
   width: 20%;
 }
