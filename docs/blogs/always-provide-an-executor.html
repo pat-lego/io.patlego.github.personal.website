@@ -34,7 +34,7 @@
 <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.7/dist/cdn.min.js"></script>
     <meta property="og:title" content="Asynchronous Java code in AEM" />
     <meta property="og:description" content="Asynchronous Java code in " />
-    <meta property="og:url" content="https://www.patlego.com/blogs/aem-archetype-and-preventing-errors.html" />
+    <meta property="og:url" content="https://www.patlego.com/blogs/always-provide-an-executor.html" />
 </head>
 
 <body>
@@ -88,7 +88,7 @@
             Executors: Asynchronous processing and defaults
         </h1>
 
-        <div class="flex flex-col justify-center md:min-h-96 m-5 md:m-1 text-xl w-full md:w-2/3">
+        <div class="flex flex-col justify-center md:min-h-96 m-5 md:m-1 text-xl w-1/2 lg:w-2/3">
 
             <p class="m-5">
                 Developing with asynchronous processes in Java is a powerful feature, but understanding what it is doing
@@ -101,7 +101,7 @@
                 The question is: what happens to that function after it starts to execute? The answer is
                 <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/Executors.html">Executors</a>.
                 When we run the lambda asynchronously without a provided executor, we run the lambda in a common pool
-                (also known as the <code>ForkJoinPool.commonPool()</code>) which has a default size of
+                (also known as the ForkJoinPool.commonPool()) which has a default size of
                 <em># of processors - 1</em>. This means that if you have 10 cores then you would be able to run
                 9 threads in parallel. The common pool cannot be changed or mutated — it is provided by the JVM
                 for shared usage.
@@ -128,8 +128,8 @@
             <p class="m-5 font-semibold text-red-500">
                 ❌ Without an Executor — runs in the Common Pool (dangerous)
             </p>
-            <div class="mx-5 overflow-x-auto">
-                <pre class="bg-gray-900 text-green-400 font-mono text-sm p-4 rounded-lg leading-relaxed"><code>// No executor provided — CompletableFuture uses ForkJoinPool.commonPool()
+            <div class="m-5 flex align-center justify-center">
+                <div class="bg-gray-900 text-green-400 font-mono text-sm p-4 rounded-lg overflow-x-scroll w-2/3">/ No executor provided — CompletableFuture uses ForkJoinPool.commonPool()
 // All tasks share the same fixed-size pool (# processors - 1 threads)
 // If these tasks wait on each other, the pool deadlocks
 
@@ -141,14 +141,14 @@ CompletableFuture&lt;String&gt; outer = CompletableFuture.supplyAsync(() -&gt; {
     });
     return inner.join(); // DEADLOCK: outer holds a pool thread waiting for inner,
                          // but inner can never get a pool thread to run
-});</code></pre>
+});</div>
             </div>
 
             <p class="m-5 font-semibold text-green-500">
                 ✅ With a dedicated Executor — isolated from the Common Pool (safe)
             </p>
-            <div class="mx-5 overflow-x-auto">
-                <pre class="bg-gray-900 text-green-400 font-mono text-sm p-4 rounded-lg leading-relaxed"><code>// Dedicated thread pool — completely separate from ForkJoinPool.commonPool()
+            <div class="m-5 flex align-center justify-center">
+                <div class="bg-gray-900 text-green-400 font-mono text-sm p-4 rounded-lg overflow-x-scroll w-2/3">// Dedicated thread pool — completely separate from ForkJoinPool.commonPool()
 // Size it based on your workload: I/O-bound tasks can use more threads than CPU cores
 ExecutorService executor = Executors.newFixedThreadPool(10);
 
@@ -162,11 +162,11 @@ CompletableFuture&lt;String&gt; outer = CompletableFuture.supplyAsync(() -&gt; {
 }, executor);
 
 // Always shut down the executor when the component is deactivated
-executor.shutdown();</code></pre>
+executor.shutdown();</div>
             </div>
 
-            <div class="m-5 overflow-x-auto">
-                <pre class="bg-gray-900 text-green-400 font-mono text-sm p-4 rounded-lg leading-relaxed"><code>"ForkJoinPool.commonPool-worker-9" #377 [15559] daemon prio=5 os_prio=0 cpu=16012.13ms elapsed=28557.79s tid=0x000055d7d56660e0 nid=15559 waiting on condition [0x00007fb0e67e5000]
+            <div class="m-5 flex align-center justify-center">
+                <div class="bg-gray-900 text-green-400 font-mono text-sm p-4 rounded-lg overflow-x-scroll w-full">"ForkJoinPool.commonPool-worker-9" #377 [15559] daemon prio=5 os_prio=0 cpu=16012.13ms elapsed=28557.79s tid=0x000055d7d56660e0 nid=15559 waiting on condition [0x00007fb0e67e5000]
    java.lang.Thread.State: TIMED_WAITING (parking)
         at jdk.internal.misc.Unsafe.park(java.base@21.0.10/Native Method)
         - parking to wait for &lt;0x00000006457777a0&gt; (a java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject)
@@ -201,7 +201,7 @@ executor.shutdown();</code></pre>
         at java.util.concurrent.ForkJoinPool$WorkQueue.topLevelExec(java.base@21.0.10/ForkJoinPool.java:1310)
         at java.util.concurrent.ForkJoinPool.scan(java.base@21.0.10/ForkJoinPool.java:1841)
         at java.util.concurrent.ForkJoinPool.runWorker(java.base@21.0.10/ForkJoinPool.java:1806)
-        at java.util.concurrent.ForkJoinWorkerThread.run(java.base@21.0.10/ForkJoinWorkerThread.java:188)</code></pre>
+        at java.util.concurrent.ForkJoinWorkerThread.run(java.base@21.0.10/ForkJoinWorkerThread.java:188)</div>
             </div>
 
         </div>
