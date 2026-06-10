@@ -1,0 +1,244 @@
+<section>
+    <div class="flex flex-col items-center min-h-screen">
+        <h1 class="font-bold m-1 text-2xl md:text-xl md:m-5 text-center">
+            Algolia in @PostConstruct: How a Sling Model can starve your JVM
+        </h1>
+
+        <div class="flex flex-col justify-center md:min-h-96 m-5 md:m-1 text-xl w-full md:w-2/3">
+
+            <p class="m-5">
+                When integrating Algolia into an AEM project, a common pattern is to initialize the search client
+                inside a Sling Model using the <span class="font-mono bg-gray-100 px-1 rounded">@PostConstruct</span>
+                annotation. On the surface it looks clean and straightforward, but under enough production load it will
+                cause your JVM to accumulate thousands of background threads until the system grinds to a halt. This
+                post explains exactly why that happens and how to fix it.
+            </p>
+
+            <h2 class="font-bold text-2xl m-5">What is a Singleton?</h2>
+
+            <p class="m-5">
+                A Singleton is a design pattern that guarantees only one instance of a class exists for the entire
+                lifetime of an application. All callers share the same object. The benefit is straightforward: you pay
+                the construction cost once, and every resource tied to that object — thread pools, connection pools,
+                open sockets — is created once and reused.
+            </p>
+
+            <p class="m-5">
+                In AEM, <span class="font-bold">OSGi Services are Singletons</span>. When the OSGi container
+                activates a service component it creates exactly one instance and holds onto it. Every bundle or
+                component that references that service receives the same object. The container also controls the
+                lifecycle: <span class="font-mono bg-gray-100 px-1 rounded">@Activate</span> fires when the service
+                starts and <span class="font-mono bg-gray-100 px-1 rounded">@Deactivate</span> fires when it is stopped
+                or the bundle is uninstalled. This makes OSGi Services the correct home for any resource that is
+                expensive to create and must be shared.
+            </p>
+
+            <h2 class="font-bold text-2xl m-5">Sling Models are not Singletons</h2>
+
+            <p class="m-5">
+                Sling Models work very differently. Each time a request arrives and AEM needs to adapt a resource or
+                request to a particular model class, the Sling Models framework calls the constructor and then runs every
+                method annotated with <span class="font-mono bg-gray-100 px-1 rounded">@PostConstruct</span>. One
+                request, one new instance. One hundred concurrent requests, one hundred new instances. There is no
+                shared object, no reuse across requests, and no container-managed lifecycle that tells you when to clean
+                things up — the model simply becomes eligible for garbage collection once the response is written.
+            </p>
+
+            <p class="m-5">
+                This is an intentional design: Sling Models are meant to be lightweight view adapters whose state is
+                scoped to a single request. The moment you start creating heavyweight, stateful infrastructure inside
+                one, you are fighting against the model's own lifecycle.
+            </p>
+
+            <h2 class="font-bold text-2xl m-5">The dangerous pattern</h2>
+
+            <p class="m-5">
+                Here is the pattern that causes the problem. It looks innocent — you annotate the method, you create the
+                client, you store it as a field:
+            </p>
+
+            <p class="m-5 font-semibold text-red-500">
+                ❌ Creating the Algolia client inside @PostConstruct (dangerous)
+            </p>
+            <div class="m-5 flex justify-center">
+                <div class="bg-gray-900 text-green-400 font-mono text-sm p-4 rounded-lg overflow-x-auto w-full lg:w-4/5">@Model(adaptables = SlingHttpServletRequest.class)
+public class SearchModel {
+
+    @OSGiService
+    private AlgoliaConfig algoliaConfig;
+
+    private SearchClient client;
+
+    @PostConstruct
+    protected void init() {
+        // NEW client created on every single request
+        this.client = DefaultSearchClient.create(
+            algoliaConfig.applicationId(),
+            algoliaConfig.searchApiKey()
+        );
+    }
+}</div>
+            </div>
+
+            <p class="m-5">
+                The problem is not the line itself — the problem is where it lives. Every request to any page that
+                renders this model creates a brand new
+                <span class="font-mono bg-gray-100 px-1 rounded">DefaultSearchClient</span>.
+            </p>
+
+            <h2 class="font-bold text-2xl m-5">What DefaultSearchClient.create() actually does</h2>
+
+            <p class="m-5">
+                The Algolia Java client uses an asynchronous Apache HttpAsyncClient under the hood. When you call
+                <span class="font-mono bg-gray-100 px-1 rounded">DefaultSearchClient.create()</span> it spins up an
+                internal I/O reactor — a set of background threads whose job is to manage non-blocking network
+                connections. These threads sit in a tight loop waiting on the OS-level epoll selector for socket events.
+                They are named
+                <span class="font-mono bg-gray-100 px-1 rounded">I/O dispatcher 1</span>,
+                <span class="font-mono bg-gray-100 px-1 rounded">I/O dispatcher 2</span>, and so on, one group per
+                client instance. They are daemon threads that continue running independently of the object that created
+                them.
+            </p>
+
+            <p class="m-5">
+                When the Sling Model instance is garbage collected after the request completes, the
+                <span class="font-mono bg-gray-100 px-1 rounded">SearchClient</span> reference goes away — but the
+                reactor threads it spawned keep running. They have no idea their owner is gone. Nothing calls
+                <span class="font-mono bg-gray-100 px-1 rounded">client.close()</span>, so the threads are never
+                signalled to stop. They are leaked.
+            </p>
+
+            <h2 class="font-bold text-2xl m-5">The thread dump evidence</h2>
+
+            <p class="m-5">
+                Under production load you will start seeing hundreds or thousands of entries like the following in your
+                JVM thread dumps. The thread name, the stack trace pointing into the Algolia shaded HttpAsyncClient, and
+                the elapsed time tell the full story:
+            </p>
+
+            <div class="m-5 flex justify-center">
+                <div class="bg-gray-900 text-green-400 font-mono text-sm p-4 rounded-lg overflow-x-auto w-full lg:w-4/5">"I/O dispatcher 1" #394 [19740] prio=5 os_prio=0 cpu=261.23ms elapsed=27922.48s
+   java.lang.Thread.State: RUNNABLE
+    at sun.nio.ch.EPoll.wait(java.base@21.0.10/Native Method)
+    at sun.nio.ch.EPollSelectorImpl.doSelect(java.base@21.0.10/EPollSelectorImpl.java:121)
+    at sun.nio.ch.SelectorImpl.lockAndDoSelect(java.base@21.0.10/SelectorImpl.java:130)
+    - locked (a sun.nio.ch.Util$2)
+    - locked (a sun.nio.ch.EPollSelectorImpl)
+    at sun.nio.ch.SelectorImpl.select(java.base@21.0.10/SelectorImpl.java:142)
+    at com.algolia.search.org.apache.http.impl.nio.reactor.AbstractIOReactor.execute
+    at com.algolia.search.org.apache.http.impl.nio.reactor.BaseIOReactor.execute
+    at com.algolia.search.org.apache.http.impl.nio.reactor.AbstractMultiworkerIOReactor$Worker.run
+    at java.lang.Thread.run(java.base@21.0.10/Thread.java:1583)</div>
+            </div>
+
+            <p class="m-5">
+                Pay close attention to two numbers. The thread ID is <span class="font-mono bg-gray-100 px-1 rounded">#394</span>,
+                meaning the JVM has already created at least 394 threads. The elapsed time is
+                <span class="font-mono bg-gray-100 px-1 rounded">27922.48s</span> — nearly eight hours. This thread
+                has been sitting idle, burning a stack allocation and a file descriptor, for the entire uptime of the
+                instance. Multiply this by every request that ever hit the page and you can see how quickly the count
+                explodes.
+            </p>
+
+            <p class="m-5">
+                Each leaked thread holds a native stack (governed by
+                <span class="font-mono bg-gray-100 px-1 rounded">-Xss</span>), an open epoll file descriptor, and a
+                slot in the JVM's internal thread table. When you have thousands of them, the JVM runs out of memory,
+                the OS refuses to allocate more file descriptors, and the system stops serving requests. The symptom
+                is a 502 Gateway Timeout and a JVM that will not recover without a restart.
+            </p>
+
+            <h2 class="font-bold text-2xl m-5">The fix: move the client into an OSGi Service</h2>
+
+            <p class="m-5">
+                Because OSGi Services are Singletons with a managed lifecycle, they are the right place to own any
+                shared, expensive resource. Create the client once in
+                <span class="font-mono bg-gray-100 px-1 rounded">@Activate</span> and close it in
+                <span class="font-mono bg-gray-100 px-1 rounded">@Deactivate</span>. Every Sling Model that needs
+                Algolia simply injects the service — no construction cost, no leaked threads, no risk.
+            </p>
+
+            <p class="m-5 font-semibold text-green-500">
+                ✅ OSGi Service owns the client — created once, shared everywhere (safe)
+            </p>
+            <div class="m-5 flex justify-center">
+                <div class="bg-gray-900 text-green-400 font-mono text-sm p-4 rounded-lg overflow-x-auto w-full lg:w-4/5">@Component(service = AlgoliaClientService.class)
+public class AlgoliaClientServiceImpl implements AlgoliaClientService {
+
+    @Reference
+    private AlgoliaConfig algoliaConfig;
+
+    private SearchClient client;
+
+    @Activate
+    protected void activate() {
+        // Called once when the bundle starts — one client, one set of I/O threads
+        this.client = DefaultSearchClient.create(
+            algoliaConfig.applicationId(),
+            algoliaConfig.searchApiKey()
+        );
+    }
+
+    @Deactivate
+    protected void deactivate() {
+        // Called once when the bundle stops — threads are properly cleaned up
+        if (client != null) {
+            client.close();
+        }
+    }
+
+    @Override
+    public SearchClient getClient() {
+        return client;
+    }
+}</div>
+            </div>
+
+            <p class="m-5 font-semibold text-green-500">
+                ✅ Sling Model injects the service — no construction, no leak (safe)
+            </p>
+            <div class="m-5 flex justify-center">
+                <div class="bg-gray-900 text-green-400 font-mono text-sm p-4 rounded-lg overflow-x-auto w-full lg:w-4/5">@Model(adaptables = SlingHttpServletRequest.class)
+public class SearchModel {
+
+    @OSGiService
+    private AlgoliaClientService algoliaClientService;
+
+    private SearchIndex&lt;?&gt; index;
+
+    @PostConstruct
+    protected void init() {
+        // Reuses the shared singleton client — zero new threads
+        this.index = algoliaClientService.getClient()
+                         .initIndex("products");
+    }
+}</div>
+            </div>
+
+            <p class="m-5">
+                With this structure, no matter how many concurrent requests hit the page, there is exactly one
+                <span class="font-mono bg-gray-100 px-1 rounded">SearchClient</span>, exactly one set of I/O
+                dispatcher threads, and a clean shutdown path when AEM restarts or the bundle is updated.
+            </p>
+
+            <p class="m-5">
+                The broader principle extends beyond Algolia. Any time you find yourself creating an HTTP client,
+                a database connection pool, a scheduled executor, or any resource that owns background threads inside
+                a <span class="font-mono bg-gray-100 px-1 rounded">@PostConstruct</span>, stop and ask whether the
+                object belongs in an OSGi Service instead. Sling Models are request-scoped view adapters. OSGi Services
+                are application-scoped shared resources. Keeping that distinction clear is what prevents an afternoon
+                of thread dump analysis at two in the morning.
+            </p>
+
+        </div>
+        <p class="m-5">
+            <a class="text-blue-500 hover:underline bg-gray-200 rounded-full px-2 py-1 inline-block m-2">#aem</a>
+            <a class="text-blue-500 hover:underline bg-gray-200 rounded-full px-2 py-1 inline-block m-2">#slingmodels</a>
+            <a class="text-blue-500 hover:underline bg-gray-200 rounded-full px-2 py-1 inline-block m-2">#osgi</a>
+            <a class="text-blue-500 hover:underline bg-gray-200 rounded-full px-2 py-1 inline-block m-2">#algolia</a>
+            <a class="text-blue-500 hover:underline bg-gray-200 rounded-full px-2 py-1 inline-block m-2">#jvm</a>
+            <a class="text-blue-500 hover:underline bg-gray-200 rounded-full px-2 py-1 inline-block m-2">#threads</a>
+            <a class="text-blue-500 hover:underline bg-gray-200 rounded-full px-2 py-1 inline-block m-2">#performance</a>
+        </p>
+    </div>
+</section>

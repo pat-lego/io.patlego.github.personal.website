@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    @@include('../partials/head.html')
+    <meta property="og:title" content="Algolia in @PostConstruct: How a Sling Model can starve your JVM" />
+    <meta property="og:description" content="Creating an Algolia SearchClient inside a Sling Model @PostConstruct leaks I/O dispatcher threads on every request. Learn why Sling Models are not Singletons, why OSGi Services are, and how to fix the leak before it crashes your AEM instance." />
+    <meta property="og:url" content="https://www.patlego.com/blogs/algolia-postconstruct-thread-starvation.html" />
+</head>
+
+<body>
+    <div>
+        <!-- Include header -->
+        @@include('../partials/header.html')
+    </div>
+
+    <main>
+        @@include('partials/algolia-postconstruct-thread-starvation.html')
+    </main>
+
+    <!-- Include footer -->
+    @@include('../partials/footer.html')
+</body>
+
+
+</html>
