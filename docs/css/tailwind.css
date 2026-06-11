@@ -532,6 +532,9 @@ video {
     max-width: 1536px;
   }
 }
+.static {
+  position: static;
+}
 .fixed {
   position: fixed;
 }
@@ -758,6 +761,9 @@ video {
 }
 .overflow-x-scroll {
   overflow-x: scroll;
+}
+.whitespace-pre {
+  white-space: pre;
 }
 .break-words {
   overflow-wrap: break-word;

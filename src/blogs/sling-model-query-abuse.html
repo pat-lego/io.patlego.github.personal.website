@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    @@include('../partials/head.html')
+    <meta property="og:title" content="Query Abuse in Sling Models: How Per-Component JCR Queries Create I/O Contention" />
+    <meta property="og:description" content="Running a JCR query in every Sling Model @PostConstruct turns a single page render into a burst of Lucene file I/O that contends on a kernel-level NativeThreadSet lock. Learn how the Lucene index is read, why FileChannelImpl serializes concurrent readers, and how to run the query once per render instead of once per component." />
+    <meta property="og:url" content="https://www.patlego.com/blogs/sling-model-query-abuse.html" />
+</head>
+
+<body>
+    <div>
+        <!-- Include header -->
+        @@include('../partials/header.html')
+    </div>
+
+    <main>
+        @@include('partials/sling-model-query-abuse.html')
+    </main>
+
+    <!-- Include footer -->
+    @@include('../partials/footer.html')
+</body>
+
+
+</html>

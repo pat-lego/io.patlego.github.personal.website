@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pat Lego.com</title>
+<meta name="description" content="Patrique Legault's website, all content relating to him and his work with technology">
+<meta name="keywords" content="Patrique Legault, personal website, portfolio, web development, projects">
+<meta name="author" content="Patrique Legault">
+
+<meta property="og:locale" content="en_US" />
+<meta property="og:image:type" content="image/jpeg" />
+<meta property="og:image:alt" content="Pat Legault profile picture" />
+<meta property="og:type" content="website" />
+
+<!-- Include CSS -->
+<link href="../css/tailwind.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<style>
+    body {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+        margin: 0;
+    }
+
+    main {
+        flex: 1;
+    }
+</style>
+
+<!-- Include JS -->
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.7/dist/cdn.min.js"></script>
+    <meta property="og:title" content="Query Abuse in Sling Models: How Per-Component JCR Queries Create I/O Contention" />
+    <meta property="og:description" content="Running a JCR query in every Sling Model @PostConstruct turns a single page render into a burst of Lucene file I/O that contends on a kernel-level NativeThreadSet lock. Learn how the Lucene index is read, why FileChannelImpl serializes concurrent readers, and how to run the query once per render instead of once per component." />
+    <meta property="og:url" content="https://www.patlego.com/blogs/sling-model-query-abuse.html" />
+</head>
+
+<body>
+    <div>
+        <!-- Include header -->
+        <header x-data="{ open: false }">
+    <div class="hidden md:flex w-full justify-between items-center p-4 bg-black">
+        <h1 class="text-xl font-bold text-white">Pat Lego.com</h1>
+        <div class="flex-col">
+            <nav>
+                <ul class="flex space-x-4">
+                    <li><a class="hover:text-blue-500 text-white" href="/">Home</a></li>
+                    <li><a class="hover:text-blue-500 text-white" href="/about.html">About</a></li>
+                    <li><a class="hover:text-blue-500 text-white" href="/blogs.html">Blogs</a></li>
+                    <li><a class="hover:text-blue-500 text-white" target="_blank"
+                            href="https://patrique.gumroad.com/l/sslji">Store</a></li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+    <!-- Mobile View -->
+    <div class="flex md:hidden w-full justify-between items-center p-4 bg-black">
+        <h1 class="text-xl font-bold text-white">Pat Lego.com</h1>
+        <button @click="open = !open" class="text-white focus:outline-none">
+            <!-- Icon for mobile menu button -->
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+            </svg>
+        </button>
+    </div>
+
+    <!-- Mobile Menu -->
+    <div x-show="open" class="md:hidden flex flex-col items-end w-full bg-black p-4">
+        <nav>
+            <ul class="flex flex-col space-y-4">
+                <li><a class="hover:text-blue-500 text-white" href="/">Home</a></li>
+                <li><a class="hover:text-blue-500 text-white" href="/about.html">About</a></li>
+                <li><a class="hover:text-blue-500 text-white" href="/blogs.html">Blogs</a></li>
+                <li><a class="hover:text-blue-500 text-white" target="_blank" href="https://patrique.gumroad.com/l/sslji">Store</a></li>
+            </ul>
+        </nav>
+    </div>
+</header>
+    </div>
+
+    <main>
+        <section>
+    <div class="flex flex-col items-center min-h-screen">
+        <h1 class="font-bold m-1 text-2xl md:text-xl md:m-5 text-center">
+            Query Abuse in Sling Models: How Per-Component JCR Queries Create I/O Contention
+        </h1>
+
+        <div class="flex flex-col justify-center md:min-h-96 m-5 md:m-1 text-xl w-full md:w-2/3">
+
+            <p class="m-5">
+                A Sling Model that runs a JCR query in its
+                <span class="font-mono bg-gray-100 px-1 rounded">@PostConstruct</span> looks harmless in isolation.
+                It takes a few milliseconds, returns a handful of nodes, and the page renders cleanly in your local
+                environment. Under production load, with dozens of components on a single page all firing their own
+                queries simultaneously, it turns into a wall of threads blocked on a kernel-level I/O lock. This post
+                follows a real thread dump to show exactly how that happens and what to do instead.
+            </p>
+
+            <h2 class="font-bold text-2xl m-5">The thread dump</h2>
+
+            <p class="m-5">
+                The following stack trace was captured from a production AEM instance. Thread #97 had been alive for
+                over 43 minutes and was completely blocked — not doing useful work, just waiting for a lock:
+            </p>
+
+            <div class="m-5 flex justify-center">
+                <div class="bg-gray-900 text-green-400 font-mono text-sm p-4 rounded-lg overflow-x-auto w-full lg:w-4/5 whitespace-pre">"192.0.2.1 [1779799224675] GET /content/mysite/markets/region/en/about/our-vision.html" #97 prio=5
+   java.lang.Thread.State: BLOCKED (on object monitor)
+    at sun.nio.ch.NativeThreadSet.add(NativeThreadSet.java:50)
+    - waiting to lock &lt;0x00000005a9063bd8&gt; (a sun.nio.ch.NativeThreadSet)
+    at sun.nio.ch.FileChannelImpl.readInternal(FileChannelImpl.java:976)
+    at sun.nio.ch.FileChannelImpl.read(FileChannelImpl.java:965)
+    at org.apache.lucene.store.NIOFSDirectory$NIOFSIndexInput.readInternal(...)
+    at org.apache.lucene.codecs.BlockTreeTermsReader$FieldReader$SegmentTermsEnum.seekExact(...)
+    at org.apache.lucene.search.TermQuery.createWeight(TermQuery.java:174)
+    at org.apache.lucene.search.IndexSearcher.search(IndexSearcher.java:289)
+    at org.apache.jackrabbit.oak.plugins.index.lucene.LucenePropertyIndex$1.loadDocs(...)
+    at org.apache.jackrabbit.oak.query.QueryImpl$RowIterator.hasNext(QueryImpl.java:960)
+    at org.apache.jackrabbit.oak.jcr.query.QueryResultImpl.getNodes(QueryResultImpl.java:176)
+    at com.day.cq.wcm.msm.impl.StatusUtil.hasChildOfTypesQuery(StatusUtil.java:280)
+    at com.day.cq.wcm.msm.impl.LiveRelationshipManagerImpl$LiveRelationshipIterator.next(...)
+    at com.mysite.core.models.utils.LocalizationUtils.getLiveCopiesPaths(LocalizationUtils.java:30)
+    at com.mysite.core.models.internal.v1.ExperienceFragmentModelImpl.findMatchingLocalizedFragmentPath(...)
+    at com.mysite.core.models.internal.v1.ExperienceFragmentModelImpl.getName(ExperienceFragmentModelImpl.java:82)</div>
+            </div>
+
+            <p class="m-5">
+                Reading from the bottom up: a Sling Model method —
+                <span class="font-mono bg-gray-100 px-1 rounded">ExperienceFragmentModelImpl.getName()</span> —
+                triggers a call to <span class="font-mono bg-gray-100 px-1 rounded">LocalizationUtils.getLiveCopiesPaths()</span>,
+                which runs a JCR query via the AEM Multi-Site Manager live relationship API. That query is backed by
+                Oak's Lucene property index, and the index data must be read from disk. The thread then blocks
+                while waiting to acquire a lock on a
+                <span class="font-mono bg-gray-100 px-1 rounded">sun.nio.ch.NativeThreadSet</span>.
+            </p>
+
+            <h2 class="font-bold text-2xl m-5">Where the Lucene index lives</h2>
+
+            <p class="m-5">
+                Unlike JCR node properties — which are stored inside the Oak repository's NodeStore — Lucene indexes
+                in AEM are serialized as binary segment files on the local filesystem under a path such as
+                <span class="font-mono bg-gray-100 px-1 rounded">crx-quickstart/repository/index/</span>.
+                These are standard Lucene <span class="font-mono bg-gray-100 px-1 rounded">.cfs</span>,
+                <span class="font-mono bg-gray-100 px-1 rounded">.fdt</span>, and
+                <span class="font-mono bg-gray-100 px-1 rounded">.tim</span> files — completely external to the JCR
+                content tree. Oak's <span class="font-mono bg-gray-100 px-1 rounded">LucenePropertyIndex</span>
+                serves as the bridge: it translates an XPath or SQL-2 query into a Lucene
+                <span class="font-mono bg-gray-100 px-1 rounded">IndexSearcher</span> operation and reads the
+                result from those files directly.
+            </p>
+
+            <p class="m-5">
+                This matters because it means every JCR query that hits the Lucene index eventually becomes a
+                <span class="font-bold">file I/O operation</span>. There is no in-memory shortcut for a cold or
+                partially-warm OS page cache. If the relevant index segments have not been read recently enough to
+                remain in the buffer cache, the JVM must wait on a real disk read.
+            </p>
+
+            <h2 class="font-bold text-2xl m-5">What <span class="font-mono">sun.nio.ch.FileChannelImpl</span> is</h2>
+
+            <p class="m-5">
+                Java reads those Lucene segment files through
+                <span class="font-mono bg-gray-100 px-1 rounded">sun.nio.ch.FileChannelImpl</span>, the internal
+                implementation of <span class="font-mono bg-gray-100 px-1 rounded">java.nio.channels.FileChannel</span>.
+                Unlike the old <span class="font-mono bg-gray-100 px-1 rounded">java.io.FileInputStream</span>,
+                <span class="font-mono bg-gray-100 px-1 rounded">FileChannel</span> uses kernel-level scatter/gather
+                I/O primitives (specifically <span class="font-mono bg-gray-100 px-1 rounded">pread(2)</span> on
+                Linux) to transfer data directly between the kernel's page cache and the JVM heap, bypassing a user-space
+                copy. This is generally faster — but the implementation must register the calling thread in a
+                <span class="font-mono bg-gray-100 px-1 rounded">NativeThreadSet</span> before each read so that
+                the JVM can interrupt the native call cleanly if the channel is closed.
+            </p>
+
+            <p class="m-5">
+                The <span class="font-mono bg-gray-100 px-1 rounded">NativeThreadSet</span> is protected by a
+                single Java monitor (the
+                <span class="font-mono bg-gray-100 px-1 rounded">- waiting to lock &lt;0x00000005a9063bd8&gt;</span>
+                line in the dump). Every thread performing a read on the same
+                <span class="font-mono bg-gray-100 px-1 rounded">FileChannel</span> must acquire that monitor
+                in order to register itself, do the read, and deregister. That serializes entry to the read path
+                across all threads sharing the channel.
+            </p>
+
+            <h2 class="font-bold text-2xl m-5">Why a burst of queries creates contention</h2>
+
+            <p class="m-5">
+                A modern AEM page template commonly contains between ten and thirty components. If each component
+                is backed by a Sling Model that independently issues a JCR query in its
+                <span class="font-mono bg-gray-100 px-1 rounded">@PostConstruct</span>, a single page render
+                becomes a burst of ten to thirty simultaneous Lucene reads. Every one of those threads races to
+                enter <span class="font-mono bg-gray-100 px-1 rounded">NativeThreadSet.add()</span>. Only one
+                succeeds at a time. The rest queue up in
+                <span class="font-mono bg-gray-100 px-1 rounded">BLOCKED</span> state waiting for the monitor,
+                as shown in the dump above.
+            </p>
+
+            <p class="m-5">
+                Now scale that to ten concurrent page requests. You have three hundred threads contending on the
+                same lock, each holding a request thread from the Sling request processing pool. The pool drains,
+                new requests queue up, response times climb into the seconds, and the system begins returning
+                503 or 502 errors. The root cause is not a slow query — it is the
+                <span class="font-bold">cumulative I/O pressure</span> created by running the same logical
+                operation dozens of times per render instead of once.
+            </p>
+
+            <p class="m-5">
+                The situation is amplified by OS-level constraints. The Linux kernel enforces limits on the number
+                of open file descriptors per process (<span class="font-mono bg-gray-100 px-1 rounded">ulimit -n</span>),
+                the maximum number of memory-mapped regions (<span class="font-mono bg-gray-100 px-1 rounded">vm.max_map_count</span>),
+                and the total I/O bandwidth available to the JVM process. A Lucene
+                <span class="font-mono bg-gray-100 px-1 rounded">NIOFSDirectory</span> holds file descriptors
+                open for each active segment reader. As the number of concurrent queries grows, so does the
+                descriptor count. Hit the limit and the JVM starts throwing
+                <span class="font-mono bg-gray-100 px-1 rounded">java.io.IOException: Too many open files</span>,
+                which brings Lucene down entirely and prevents any content query from completing.
+            </p>
+
+            <h2 class="font-bold text-2xl m-5">The dangerous pattern</h2>
+
+            <p class="m-5">
+                The stack trace traces back to this logical structure — a query that is perfectly reasonable in
+                isolation but catastrophic when it runs once per component per request:
+            </p>
+
+            <p class="m-5 font-semibold text-red-500">
+                ❌ Query executed once per component per request (dangerous)
+            </p>
+            <div class="m-5 flex justify-center">
+                <div class="bg-gray-900 text-green-400 font-mono text-sm p-4 rounded-lg overflow-x-auto w-full lg:w-4/5 whitespace-pre">@Model(adaptables = SlingHttpServletRequest.class)
+public class ExperienceFragmentModelImpl {
+
+    @SlingObject
+    private ResourceResolver resourceResolver;
+
+    private String localizedPath;
+
+    @PostConstruct
+    protected void init() {
+        // Runs a JCR query — every instance of this component
+        // on the page triggers a separate Lucene I/O burst
+        List&lt;String&gt; liveCopies = LocalizationUtils.getLiveCopiesPaths(
+            resourceResolver, getCurrentPath()
+        );
+        this.localizedPath = findMatch(liveCopies);
+    }
+}</div>
+            </div>
+
+            <p class="m-5">
+                If a page has eight Experience Fragment components, this query executes eight times in parallel
+                for every request. Every execution is an independent Lucene search, an independent call into
+                <span class="font-mono bg-gray-100 px-1 rounded">FileChannelImpl.read()</span>, and an
+                independent contender on the <span class="font-mono bg-gray-100 px-1 rounded">NativeThreadSet</span>
+                lock. The query result is identical every time — the live copy structure does not change between
+                component renders on the same request — but the I/O cost is paid eight times anyway.
+            </p>
+
+            <h2 class="font-bold text-2xl m-5">The fix: run the query once per render</h2>
+
+            <p class="m-5">
+                The live copy paths for a given page are the same regardless of which component asks for them.
+                That makes them a perfect candidate for request-scoped caching. There are two clean ways to
+                accomplish this in AEM.
+            </p>
+
+            <p class="m-5">
+                The first approach is to move the query into a higher-level Sling Model that is adapted once per
+                request and injected into each component model. Because Sling can cache model adaptations within
+                a request, the query runs exactly once:
+            </p>
+
+            <p class="m-5 font-semibold text-green-500">
+                ✅ Query result computed once and shared across components (safe)
+            </p>
+            <div class="m-5 flex justify-center">
+                <div class="bg-gray-900 text-green-400 font-mono text-sm p-4 rounded-lg overflow-x-auto w-full lg:w-4/5 whitespace-pre">@Model(adaptables = SlingHttpServletRequest.class,
+       defaultInjectionStrategy = DefaultInjectionStrategy.OPTIONAL)
+public class LocalizationContextModel {
+
+    @SlingObject
+    private ResourceResolver resourceResolver;
+
+    @Self
+    private SlingHttpServletRequest request;
+
+    private List&lt;String&gt; liveCopiesPaths;
+
+    @PostConstruct
+    protected void init() {
+        // Executes once per request regardless of how many
+        // components inject this model
+        this.liveCopiesPaths = LocalizationUtils.getLiveCopiesPaths(
+            resourceResolver, request.getResource().getPath()
+        );
+    }
+
+    public List&lt;String&gt; getLiveCopiesPaths() {
+        return liveCopiesPaths;
+    }
+}
+
+// Component model — no query, just a lookup
+@Model(adaptables = SlingHttpServletRequest.class)
+public class ExperienceFragmentModelImpl {
+
+    @Self
+    private SlingHttpServletRequest request;
+
+    private String localizedPath;
+
+    @PostConstruct
+    protected void init() {
+        // Reuses the cached result — zero additional I/O
+        LocalizationContextModel ctx = request.adaptTo(LocalizationContextModel.class);
+        if (ctx != null) {
+            this.localizedPath = findMatch(ctx.getLiveCopiesPaths());
+        }
+    }
+}</div>
+            </div>
+
+            <p class="m-5">
+                The second approach is to store the result directly in a request attribute, which acts as a
+                plain key-value cache scoped to the current HTTP request:
+            </p>
+
+            <div class="m-5 flex justify-center">
+                <div class="bg-gray-900 text-green-400 font-mono text-sm p-4 rounded-lg overflow-x-auto w-full lg:w-4/5 whitespace-pre">public class LocalizationUtils {
+
+    private static final String ATTR_LIVE_COPIES =
+        LocalizationUtils.class.getName() + ".liveCopies";
+
+    @SuppressWarnings("unchecked")
+    public static List&lt;String&gt; getLiveCopiesPaths(
+            SlingHttpServletRequest request,
+            ResourceResolver resolver,
+            String pagePath) {
+
+        List&lt;String&gt; cached =
+            (List&lt;String&gt;) request.getAttribute(ATTR_LIVE_COPIES);
+
+        if (cached != null) {
+            return cached;
+        }
+
+        // First caller on this request pays the I/O cost
+        List&lt;String&gt; result = queryLiveCopies(resolver, pagePath);
+        request.setAttribute(ATTR_LIVE_COPIES, result);
+        return result;
+    }
+}</div>
+            </div>
+
+            <p class="m-5">
+                Both patterns produce the same outcome: one Lucene read per page request, regardless of how many
+                components need the data. The I/O contention disappears because the
+                <span class="font-mono bg-gray-100 px-1 rounded">NativeThreadSet</span> lock is acquired once,
+                not once per component.
+            </p>
+
+            <h2 class="font-bold text-2xl m-5">The broader principle</h2>
+
+            <p class="m-5">
+                JCR queries are not free. Each one that hits the Lucene index reads from a binary file on disk
+                through a kernel I/O path that is subject to file descriptor limits, OS page cache pressure, and
+                a shared Java monitor that serializes concurrent readers. A single query is rarely the problem.
+                The problem is multiplying that cost by the number of components on a page and then again by the
+                number of concurrent requests hitting the server.
+            </p>
+
+            <p class="m-5">
+                Before adding a query to a Sling Model, ask whether the same data will be needed by other
+                components on the same page during the same request. If yes, fetch it once at the request boundary
+                — in a shared model, a request attribute, or a servlet filter — and let every component read
+                from that in-memory result. The Lucene index and the OS I/O subsystem are shared resources.
+                Treating them that way in your code is what keeps thread dumps boring.
+            </p>
+
+        </div>
+        <p class="m-5">
+            <a class="text-blue-500 hover:underline bg-gray-200 rounded-full px-2 py-1 inline-block m-2">#aem</a>
+            <a class="text-blue-500 hover:underline bg-gray-200 rounded-full px-2 py-1 inline-block m-2">#slingmodels</a>
+            <a class="text-blue-500 hover:underline bg-gray-200 rounded-full px-2 py-1 inline-block m-2">#jcr</a>
+            <a class="text-blue-500 hover:underline bg-gray-200 rounded-full px-2 py-1 inline-block m-2">#lucene</a>
+            <a class="text-blue-500 hover:underline bg-gray-200 rounded-full px-2 py-1 inline-block m-2">#oak</a>
+            <a class="text-blue-500 hover:underline bg-gray-200 rounded-full px-2 py-1 inline-block m-2">#performance</a>
+            <a class="text-blue-500 hover:underline bg-gray-200 rounded-full px-2 py-1 inline-block m-2">#threads</a>
+            <a class="text-blue-500 hover:underline bg-gray-200 rounded-full px-2 py-1 inline-block m-2">#io</a>
+        </p>
+    </div>
+</section>
+
+    </main>
+
+    <!-- Include footer -->
+    <footer class="bg-black text-white p-4">
+    <div class="flex justify-between items-center">
+        <p>&copy; Pat Lego.com</p>
+        <div class="flex items-start space-x-4">
+            <a class="mr-5" href="https://www.linkedin.com/in/patrique-legault" target="_blank">
+                <i class="fab fa-linkedin fa-2x"></i>
+            </a>
+            <a class="pr-5" href="https://twitter.com/_patlego" target="_blank">
+                <i class="fab fa-twitter fa-2x"></i>
+            </a>
+        </div>
+    </div>
+</footer>
+</body>
+
+
+</html>
