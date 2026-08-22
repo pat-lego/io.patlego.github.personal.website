@@ -532,6 +532,9 @@ video {
     max-width: 1536px;
   }
 }
+.visible {
+  visibility: visible;
+}
 .static {
   position: static;
 }
@@ -663,6 +666,9 @@ video {
 }
 .flex-1 {
   flex: 1 1 0%;
+}
+.grow {
+  flex-grow: 1;
 }
 @keyframes pulse {
 

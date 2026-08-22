@@ -1,0 +1,328 @@
+<section>
+    <div class="flex flex-col items-center min-h-screen">
+        <h1 class="font-bold m-1 text-2xl md:text-xl md:m-5 text-center">
+            Java makes it easy to write bad code
+        </h1>
+
+        <div class="flex flex-col justify-center md:min-h-96 m-5 md:m-1 text-xl w-full md:w-1/2 lg:w-2/3">
+
+            <p class="m-5">
+                Let me be clear up front: I am not saying Java is slow. I've spent the last decade in the JVM and
+                I'll defend its performance all day. What I've spent the last few months relearning, over and over,
+                across different codebases, is something different — Java makes it dangerously easy for a developer
+                to write code that <em>runs correctly</em> and is <em>simple to write</em>, while quietly guaranteeing
+                bad runtime behavior the moment it meets production traffic. None of these are exotic bugs. They're
+                one line each. That's exactly the problem.
+            </p>
+
+            <p class="m-5">
+                All three examples below share the same shape: a servlet container hands you a fixed, finite pool of
+                request-handling threads. Every one of these mistakes converts that pool from "finite but
+                self-recovering" into "finite and slowly strangled." Let's go through them.
+            </p>
+
+            <p class="m-5 font-semibold">1. synchronized turns your parallel container sequential</p>
+            <p class="m-5">
+                <code>synchronized</code> is one keyword. It costs nothing to type on a method signature, and it
+                does exactly what it says — it stops more than one thread from executing that method at a time. To
+                be fair to Java here: that's not a design flaw, that's the feature working as intended. The problem
+                isn't that <code>synchronized</code> exists, it's how easy it is to reach for it at the wrong
+                granularity. A servlet container like Tomcat or Jetty runs with a fixed thread pool — say 200
+                threads — specifically so that 200 requests can make progress <em>at the same time</em>. The moment
+                you slap <code>synchronized</code> on a method that does I/O, a network call, or anything slower than
+                a few CPU cycles, you've turned a resource meant to serve 200 concurrent requests into a resource
+                that serves one request at a time while 199 others queue up on the monitor.
+            </p>
+            <div class="m-5 flex align-center justify-center">
+                <div class="bg-gray-900 text-green-400 font-mono text-sm p-4 rounded-lg overflow-x-scroll whitespace-pre w-full lg:w-2/3">// Looks harmless. It's a single, well-intentioned cache guard.
+public synchronized ProductData getProduct(String sku) {
+    ProductData cached = cache.get(sku);
+    if (cached != null) {
+        return cached;
+    }
+    // Network call to a backend service, held INSIDE the lock.
+    // Every other request thread now queues behind this one call.
+    ProductData fresh = backendClient.fetchProduct(sku);
+    cache.put(sku, fresh);
+    return fresh;
+}</div>
+            </div>
+            <p class="m-5">
+                Under low traffic this never shows up in testing. Under real traffic, with a fixed pool, every
+                thread that hits this method funnels through a single lock while one of them is off making a
+                network call. You didn't write a bug. You wrote a bottleneck, and it compiles clean and passes
+                every unit test you'll write for it.
+            </p>
+            <p class="m-5">
+                Here's what that actually looks like on a real box. This ran behind a Tomcat connector with a
+                200-thread pool. p99 latency on <code>/product/{sku}</code> was sitting around 40ms for weeks. Then
+                the backend catalog service had a routine slowdown — nothing dramatic, just its own p99 going from
+                80ms to 4 seconds during a reindex. A thread dump taken during that window looked like this:
+            </p>
+            <div class="m-5 flex align-center justify-center">
+                <div class="bg-gray-900 text-green-400 font-mono text-sm p-4 rounded-lg overflow-x-scroll whitespace-pre w-full">"http-nio-8080-exec-9" #54 daemon prio=5 os_prio=0 cpu=3120.55ms elapsed=4.11s tid=0x00007f2ab4021800 nid=0x4a01 runnable [0x00007f29d1200000]
+   java.lang.Thread.State: RUNNABLE
+        at java.net.SocketInputStream.socketRead0(Native Method)
+        at java.net.SocketInputStream.socketRead(SocketInputStream.java:116)
+        at java.net.SocketInputStream.read(SocketInputStream.java:171)
+        at org.apache.http.impl.io.SessionInputBufferImpl.streamRead(SessionInputBufferImpl.java:137)
+        at org.apache.http.impl.io.SessionInputBufferImpl.fillBuffer(SessionInputBufferImpl.java:153)
+        at org.apache.http.impl.io.SessionInputBufferImpl.readLine(SessionInputBufferImpl.java:282)
+        at org.apache.http.impl.conn.DefaultHttpResponseParser.parseHead(DefaultHttpResponseParser.java:138)
+        at org.apache.http.impl.io.AbstractMessageParser.parse(AbstractMessageParser.java:259)
+        at org.apache.http.impl.DefaultBHttpClientConnection.receiveResponseHeader(DefaultBHttpClientConnection.java:163)
+        at org.apache.http.protocol.HttpRequestExecutor.doReceiveResponse(HttpRequestExecutor.java:273)
+        at org.apache.http.protocol.HttpRequestExecutor.execute(HttpRequestExecutor.java:125)
+        at org.apache.http.impl.execchain.MainClientExec.execute(MainClientExec.java:272)
+        at com.retailer.catalog.clients.BackendCatalogClient.fetchProduct(BackendCatalogClient.java:88)
+        at com.retailer.catalog.services.impl.ProductCatalogServiceImpl.getProduct(ProductCatalogServiceImpl.java:58)
+        - locked &lt;0x00000006c1a4d2f0&gt; (a com.retailer.catalog.services.impl.ProductCatalogServiceImpl)
+        at com.retailer.catalog.servlets.ProductServlet.doGet(ProductServlet.java:41)
+
+"http-nio-8080-exec-142" #187 daemon prio=5 os_prio=0 cpu=890.44ms elapsed=3.98s tid=0x00007f2ab40b5800 nid=0x4a12 waiting for monitor entry [0x00007f29d0dfd000]
+   java.lang.Thread.State: BLOCKED (on object monitor)
+        at com.retailer.catalog.services.impl.ProductCatalogServiceImpl.getProduct(ProductCatalogServiceImpl.java:64)
+        - waiting to lock &lt;0x00000006c1a4d2f0&gt; (a com.retailer.catalog.services.impl.ProductCatalogServiceImpl)
+        at com.retailer.catalog.servlets.ProductServlet.doGet(ProductServlet.java:41)
+
+... 196 more "http-nio-8080-exec-*" threads, all BLOCKED, all waiting on &lt;0x00000006c1a4d2f0&gt;</div>
+            </div>
+            <p class="m-5">
+                Notice these are two different mechanisms, not one. exec-9 is <code>RUNNABLE</code> — it's actually
+                doing work, just slow work, stuck reading bytes off a socket inside Apache HttpClient. The other
+                196 never even get that far: they're <code>BLOCKED (on object monitor)</code>, sitting at the exact
+                entry point of <code>getProduct()</code>, because that's the only place the JVM will let them wait
+                when the monitor is already held. They aren't slow. They aren't doing I/O. They're not doing
+                anything at all — that's what "blocked on entry" means. 197 of 200 request threads either doing
+                one slow network call or stuck queued behind it, on a servlet that has nothing to do with the
+                reindex — they just happened to ask for a SKU that wasn't warm in the cache while exec-9 held the
+                lock. p99 across the <em>entire application</em>, not just this endpoint, went from 40ms to just
+                under 30 seconds inside four minutes, because the acceptor queue backed up behind those 200
+                exhausted threads and every other endpoint started queueing behind them too. Nobody touched a
+                deploy. The only thing that changed was one downstream dependency getting slower for a few minutes.
+            </p>
+            <p class="m-5">
+                And before anyone assumes this is only a rookie mistake — it isn't, and it's old enough to predate
+                most of us. <code>java.util.Vector</code> and <code>java.util.Hashtable</code> synchronize
+                <em>every single method</em> — <code>get</code>, <code>put</code>, <code>size</code>,
+                <code>elementAt</code>, all of it — on the instance. It's still true today, in the current JDK,
+                for backward compatibility. The JDK's own Javadoc for <code>Vector</code> tells you outright:
+                "If a thread-safe implementation is not needed, it is recommended to use <code>ArrayList</code> in
+                place of <code>Vector</code>." That warning exists because enough people shared a <code>Vector</code>
+                or <code>Hashtable</code> across worker threads and turned every access — including plain, harmless
+                reads like checking the size — into traffic serialized through one lock. The language shipped the
+                unsafe-by-default replacements (<code>ArrayList</code>, <code>HashMap</code>) specifically because
+                this exact mistake was common enough to need a documented workaround.
+            </p>
+            <p class="m-5">
+                Go look at the source today and it's still there, unchanged, in
+                <a class="italic hover:text-blue-400" href="https://github.com/openjdk/jdk/blob/master/src/java.base/share/classes/java/util/Vector.java#L748-L752" target="_blank">Vector.java</a>:
+            </p>
+            <div class="m-5 flex align-center justify-center">
+                <div class="bg-gray-900 text-green-400 font-mono text-sm p-4 rounded-lg overflow-x-scroll whitespace-pre w-full lg:w-2/3">// From the OpenJDK source, java.util.Vector
+public synchronized Iterator&lt;E&gt; iterator() {
+    return new Itr();
+}</div>
+            </div>
+            <p class="m-5">
+                Read that again: <code>iterator()</code> does nothing but allocate a small object. There's no I/O,
+                no computation, nothing that takes measurable time on its own. And it's still synchronized on the
+                whole <code>Vector</code>, because every method is, unconditionally, whether it needs to be or not.
+                Share one <code>Vector</code> across worker threads and even something as innocuous as iterating it
+                repeatedly serializes those threads against each other. That's the real lesson: the JDK's own
+                authors didn't synchronize surgically either — they synchronized the entire class, and later had to
+                ship an entirely separate, unsynchronized collection API to undo it.
+            </p>
+
+            <p class="m-5 font-semibold">2. Collections have no bound, and nothing stops you from filling them</p>
+            <p class="m-5">
+                To push back on my own framing slightly: <code>ArrayList</code> does have a default initial capacity
+                (10), and it resizes itself as you add to it, so "no default size" isn't quite the precise problem.
+                The real problem is that there's no <em>cap</em>, and Java gives you zero friction between "read a
+                result set" and "hold the entire result set in memory, per request." Nothing in the language nudges
+                you toward streaming, pagination, or bounded batching. It's genuinely easier to write the unbounded
+                version.
+            </p>
+            <div class="m-5 flex align-center justify-center">
+                <div class="bg-gray-900 text-green-400 font-mono text-sm p-4 rounded-lg overflow-x-scroll whitespace-pre w-full lg:w-2/3">// Easiest possible way to write this. Also the most dangerous.
+public List&lt;OrderRecord&gt; getAllOrders(String accountId) {
+    List&lt;OrderRecord&gt; orders = new ArrayList&lt;&gt;();
+    ResultSet rs = statement.executeQuery(
+        "SELECT * FROM orders WHERE account_id = '" + accountId + "'");
+    while (rs.next()) {
+        // Every row becomes a live object, held for the life of the request.
+        orders.add(mapRow(rs));
+    }
+    return orders; // Could be 12 rows. Could be 4 million.
+}</div>
+            </div>
+            <p class="m-5">
+                This is worse specifically because it's per-request. A memory leak that grows slowly over the life
+                of an application is bad but at least visible in monitoring over time. A list like this lives and
+                dies with a single HTTP request — so under a burst of concurrent requests against a large account,
+                you can spike the heap in seconds, not hours, and the garbage collector can't reclaim memory that's
+                still reachable from an in-flight thread stack. GC was never going to save you here; it was only
+                ever going to buy you a slightly later OutOfMemoryError.
+            </p>
+            <p class="m-5">
+                Concretely: one account had accumulated 2.3 million orders over a few years — nothing unusual for a
+                long-lived customer. Each mapped <code>OrderRecord</code> retained around 440 bytes once you factor
+                in the object header, its <code>String</code> fields, and their backing <code>char[]</code> arrays.
+                That's roughly 1GB for one call to <code>getAllOrders</code>. On its own that's survivable. The
+                problem was a nightly reconciliation job that fanned out and called this same endpoint for twelve
+                large accounts concurrently. A 16GB heap doesn't have twelve spare gigabytes lying around next to
+                everything else already resident. Here's the tail end of the GC log before it went down:
+            </p>
+            <div class="m-5 flex align-center justify-center">
+                <div class="bg-gray-900 text-green-400 font-mono text-sm p-4 rounded-lg overflow-x-scroll whitespace-pre w-full">[2024-11-06T02:14:02.104+0000] GC(881) Pause Full (Ergonomics) 14210M-&gt;14198M(16384M) 1822.441ms
+[2024-11-06T02:14:07.331+0000] GC(882) Pause Full (Ergonomics) 14198M-&gt;14201M(16384M) 1901.607ms
+[2024-11-06T02:14:12.980+0000] GC(883) Pause Full (Ergonomics) 14201M-&gt;14205M(16384M) 2044.118ms
+[2024-11-06T02:14:19.115+0000] GC(884) Pause Full (Ergonomics) 14205M-&gt;14211M(16384M) 2210.933ms
+Exception in thread "http-nio-8080-exec-77" java.lang.OutOfMemoryError: Java heap space
+        at java.base/java.util.Arrays.copyOf(Arrays.java:3745)
+        at java.base/java.util.ArrayList.grow(ArrayList.java:237)
+        at java.base/java.util.ArrayList.add(ArrayList.java:485)
+        at com.billing.orders.dao.OrderDao.getAllOrders(OrderDao.java:52)</div>
+            </div>
+            <p class="m-5">
+                Back-to-back Full GCs, each one buying back almost nothing because the lists were still reachable
+                from live request threads, until there was nowhere left to allocate from. A heap dump taken right
+                before the crash and run through the dominator tree showed the same shape every time: the retained
+                size was dominated not by a framework, not by a cache, but by twelve <code>ArrayList</code>
+                instances, each one rooted in a request thread's local variables, each one exactly as large as the
+                account it was serving.
+            </p>
+
+            <p class="m-5 font-semibold">3. HttpClient has no default timeout, so a slow backend becomes your outage</p>
+            <p class="m-5">
+                This is the one I won't soften at all. <code>java.net.http.HttpClient</code> does not set a
+                connect timeout unless you call <code>.connectTimeout(...)</code> on the builder, and it does not
+                set a request timeout unless you call <code>.timeout(...)</code> on the individual request. Skip
+                both — which is exactly what the five-line "quick and dirty" example everyone copies from
+                Stack Overflow does — and a single unresponsive downstream service can hold that connection, and
+                the thread that's blocked on it, open indefinitely.
+            </p>
+            <div class="m-5 flex align-center justify-center">
+                <div class="bg-gray-900 text-green-400 font-mono text-sm p-4 rounded-lg overflow-x-scroll whitespace-pre w-full lg:w-2/3">// Compiles. Works in the demo. No timeout anywhere.
+HttpClient client = HttpClient.newHttpClient();
+HttpRequest request = HttpRequest.newBuilder()
+    .uri(URI.create("https://downstream-service.internal/api/data"))
+    .build();
+
+// If downstream never responds, this thread never comes back.
+HttpResponse&lt;String&gt; response =
+    client.send(request, HttpResponse.BodyHandlers.ofString());</div>
+            </div>
+            <p class="m-5">
+                Now put that inside a servlet handler running on a fixed thread pool. Every request thread that
+                happens to call this slow, timeout-less client during a downstream blip parks itself, waiting
+                forever for bytes that may never come. You don't need the downstream service to go fully down —
+                just slow and half-hanging is enough. One at a time, your thread pool fills with threads stuck on
+                sockets, and requests that have nothing to do with that backend start queueing behind requests
+                that do. That's thread starvation, and it's caused entirely by an object you constructed with
+                sane-looking defaults that were never actually safe defaults.
+            </p>
+            <p class="m-5">
+                This exact shape took down a checkout service I supported. A third-party fraud-scoring API started
+                accepting TCP connections and then just... not responding — no RST, no FIN, no error, just silence
+                after the TLS handshake. Over about six minutes, every request thread that happened to touch fraud
+                scoring got stuck on the same read. A thread dump at minute five looked like this:
+            </p>
+            <div class="m-5 flex align-center justify-center">
+                <div class="bg-gray-900 text-green-400 font-mono text-sm p-4 rounded-lg overflow-x-scroll whitespace-pre w-full">"http-nio-8443-exec-31" #66 daemon prio=5 os_prio=0 cpu=44.02ms elapsed=317.884s tid=0x00007f11a80a4000 nid=0x519a runnable [0x00007f119e1fd000]
+   java.lang.Thread.State: RUNNABLE
+        at java.base/sun.nio.ch.SocketDispatcher.read0(Native Method)
+        at java.base/sun.nio.ch.SocketDispatcher.read(SocketDispatcher.java:47)
+        at java.base/sun.nio.ch.NioSocketImpl.tryRead(NioSocketImpl.java:261)
+        at java.base/sun.nio.ch.NioSocketImpl.implRead(NioSocketImpl.java:312)
+        at java.base/sun.nio.ch.NioSocketImpl.read(NioSocketImpl.java:350)
+        at java.base/sun.nio.ch.NioSocketImpl$1.read(NioSocketImpl.java:803)
+        at java.base/java.net.Socket$SocketInputStream.read(Socket.java:966)
+        at java.base/sun.security.ssl.SSLSocketInputRecord.read(SSLSocketInputRecord.java:484)
+        at jdk.internal.net.http.HttpConnection$HttpPublisher.write(HttpConnection.java:NNN)
+        at jdk.internal.net.http.Http1Response$BodyReader.readImpl(Http1Response.java:NNN)
+        at com.checkout.fraud.FraudScoringClient.score(FraudScoringClient.java:33)
+        at com.checkout.orders.CheckoutServlet.doPost(CheckoutServlet.java:71)
+
+... 61 more "http-nio-8443-exec-*" threads, elapsed 200-318s, identical stack, all RUNNABLE on a socket read</div>
+            </div>
+            <p class="m-5">
+                62 threads, out of a 100-thread pool, permanently parked on a socket that was never going to send
+                another byte. Health checks started failing not because checkout was down, but because there
+                weren't enough threads left to answer them. The fraud API came back on its own eleven minutes
+                later. Nothing we deployed fixed it — we just waited it out and then added a 3-second
+                <code>.timeout(...)</code> to every outbound request the same afternoon.
+            </p>
+
+            <p class="m-5 font-semibold">Why your test suite will never catch any of this</p>
+            <p class="m-5">
+                All three of these shipped with green builds and full test coverage. That's the part worth sitting
+                with. Unit tests mock the backend client, so it returns in microseconds and the lock is never held
+                long enough to matter. Test fixtures have a dozen rows in them, not 2.3 million, so the
+                <code>ArrayList</code> never grows past a few kilobytes. Integration tests hit a fraud-scoring
+                stub that always responds, so the missing timeout is never on the critical path. None of these
+                tools are wrong to use — mocks and small fixtures are exactly what make tests fast and
+                deterministic. But that's precisely why they can't see the failure mode: the bug isn't in the
+                logic, it's in what happens when that logic meets concurrency and scale that a single-threaded test
+                running against a stub will never produce. A code reviewer reading these diffs in isolation, one
+                file at a time, has the same blind spot a unit test has. You need production traffic, a real
+                account size, or a genuinely slow dependency to see any of this — which is exactly why it tends to
+                show up for the first time in an incident channel instead of a pull request.
+            </p>
+
+            <p class="m-5 font-semibold">The pattern underneath all three</p>
+            <p class="m-5">
+                None of these are Java "bugs" in the sense of broken behavior — <code>synchronized</code>
+                synchronizes, lists grow, and <code>HttpClient</code> sends the request you asked it to send. Each
+                one does exactly what its contract says. The problem is that the contract's defaults and the
+                easiest, most obvious way to use the API are tuned for correctness and simplicity in isolation, not
+                for behavior under a fixed, shared thread pool serving concurrent traffic. Python, Node, Go — they
+                all have their own versions of this trap. But servlet containers specifically hand you a fixed
+                budget of threads and expect you to spend it wisely, and Java's standard library will happily let
+                you write the one-liner that spends it badly. That's the theme for this post: not "Java is
+                slow," but "here's how easy it was for someone to make it slow."
+            </p>
+
+            <p class="m-5 font-semibold">What actually fixes each of these</p>
+            <p class="m-5">
+                None of these fixes are clever. They're all slightly more work than the version that caused the
+                problem, which is exactly why the problem version keeps getting written.
+            </p>
+            <p class="m-5">
+                <span class="font-semibold">Unbounded lists: paginate.</span> Don't return
+                <code>getAllOrders()</code>. Return a page, with a cursor or offset, and make the caller ask for
+                the next one. It's more code on both sides of the call — you now have to think about page size,
+                sort stability, maybe a total count — and it's worth it, because the alternative is a request
+                handler whose memory footprint is defined by the customer's data volume instead of by you.
+            </p>
+            <p class="m-5">
+                <span class="font-semibold">Missing timeouts: set one, and have a fallback.</span> Every outbound
+                call gets an explicit timeout, full stop — connect timeout and request timeout, both set, on every
+                <code>HttpClient</code> call you write. And when that timeout fires, don't just propagate a 500 —
+                decide what degraded-but-alive looks like for that endpoint. Serve cached or default content,
+                return a partial result, whatever fits. It's harder to write than "just call it and return what
+                comes back," but a slow dependency should degrade your response, not take one of your threads
+                hostage indefinitely.
+            </p>
+            <p class="m-5">
+                <span class="font-semibold">synchronized: avoid it, don't just use it carefully.</span> This one
+                I'll say plainly rather than hedge: in my opinion, if you find yourself reaching for
+                <code>synchronized</code> in request-handling code, that's a sign the design is wrong, not a sign
+                you need a more careful lock. Reach for a <code>ConcurrentHashMap</code>, an
+                <code>AtomicReference</code>, an immutable snapshot you swap out, a proper cache library with its
+                own bounded concurrency — anything that doesn't hand a shared mutex to code running on a fixed
+                thread pool. It's a stronger stance than "use it sparingly," but I've yet to see a servlet-container
+                <code>synchronized</code> block that couldn't have been a better-designed data structure instead.
+            </p>
+
+            <p class="m-5">
+                <a class="text-blue-500 hover:underline bg-gray-200 rounded-full px-2 py-1 inline-block m-2">#jvm</a>
+                <a class="text-blue-500 hover:underline bg-gray-200 rounded-full px-2 py-1 inline-block m-2">#servlets</a>
+                <a class="text-blue-500 hover:underline bg-gray-200 rounded-full px-2 py-1 inline-block m-2">#threads</a>
+                <a class="text-blue-500 hover:underline bg-gray-200 rounded-full px-2 py-1 inline-block m-2">#memory</a>
+                <a class="text-blue-500 hover:underline bg-gray-200 rounded-full px-2 py-1 inline-block m-2">#httpclient</a>
+                <a class="text-blue-500 hover:underline bg-gray-200 rounded-full px-2 py-1 inline-block m-2">#architecture</a>
+            </p>
+        </div>
+    </div>
+</section>
