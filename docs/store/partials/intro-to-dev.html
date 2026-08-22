@@ -1,6 +1,6 @@
 <section>
-    <div class="flex flex-col items-center min-h-screen w-full">
-        <div class="flex flex-col md:flex-row w-11/12 md:w-4/5 mt-5 md:mt-10 max-w-5xl">
+    <div class="flex flex-col items-center min-h-screen w-full px-4">
+        <div class="flex flex-col md:flex-row w-full md:w-4/5 mt-5 md:mt-10 max-w-5xl">
             <div class="w-full md:w-1/2 flex justify-center mb-5 md:mb-0">
                 <img src="/assets/intro-to-dev-cartoon.svg" alt="Intro to Dev"
                     class="w-full max-w-sm rounded-lg border-2 border-black object-cover">
@@ -11,12 +11,259 @@
                 <p class="text-blue-500 font-bold mt-2">Starts October 3, 2026</p>
                 <p class="font-bold text-xl mt-1">$100</p>
                 <p class="mt-4 text-base md:text-lg">
-                    A curriculum built to take you from zero to writing your first real software projects. This page
-                    will be updated with the full curriculum outline and checkout as it's finished.
+                    A beginner-friendly course built for high school students who have never
+                    written a line of code before. No projects, no installs beyond a runtime, and
+                    no pressure — we start by just typing directly into a few simple interactive
+                    shells to see what code actually does before worrying about building anything
+                    real.
                 </p>
-                <div class="mt-6 border-2 border-dashed border-black rounded p-4 text-center text-gray-600">
-                    Curriculum and checkout coming soon.
+            </div>
+        </div>
+
+        <!-- Why this matters -->
+        <div class="w-full md:w-4/5 max-w-5xl mt-8">
+            <h2 class="text-xl md:text-2xl font-bold mb-3 text-center md:text-left">Why does this matter?</h2>
+            <p class="text-sm md:text-base text-gray-600">
+                A program is just a list of instructions a computer follows, in order, one at a
+                time. That's really it — every other idea in programming is a variation on that.
+                Most "intro to coding" material jumps straight into building an app, which means
+                you spend more time fighting an editor and installing tools than actually learning
+                what code does. This course skips all of that: you type one line into a shell, you
+                see exactly what happens, and you build up ideas one at a time before ever touching
+                a real project.
+            </p>
+        </div>
+
+        <!-- Tools -->
+        <div class="w-full md:w-4/5 max-w-5xl mt-8">
+            <h2 class="text-xl md:text-2xl font-bold mb-3 text-center md:text-left">Tools you'll use</h2>
+            <div class="flex flex-wrap gap-2 justify-center md:justify-start">
+                <span class="border-2 border-black rounded-full px-3 py-1 text-sm">Node REPL (<code>node</code>)</span>
+                <span class="border-2 border-black rounded-full px-3 py-1 text-sm">Python Shell (<code>python3</code>)</span>
+                <span class="border-2 border-black rounded-full px-3 py-1 text-sm">Java Shell (<code>jshell</code>)</span>
+            </div>
+            <p class="text-sm text-gray-600 mt-2 text-center md:text-left">
+                That's it — each of these opens a prompt in your terminal where you can type a line
+                of code and immediately see what happens. No files, no compiling, no real projects
+                yet.
+            </p>
+        </div>
+
+        <!-- Curriculum -->
+        <div class="w-full md:w-4/5 max-w-5xl mt-8 mb-10">
+            <h2 class="text-xl md:text-2xl font-bold mb-3 text-center md:text-left">Curriculum</h2>
+            <div class="flex flex-col gap-6">
+                <div class="border-2 border-black rounded-lg p-4">
+                    <span class="text-sm font-bold text-blue-500">Module 1</span>
+                    <h3 class="font-bold text-lg mt-1">What is a variable?</h3>
+                    <p class="text-sm text-gray-600 mt-1">
+                        Using the Node, Python, and Java shells side by side to store a value in a
+                        name, print it back out, and change it. You'll see the exact same idea
+                        expressed three different ways.
+                    </p>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-2 mt-3">
+                        <div>
+                            <span class="text-xs font-bold text-gray-500">Node</span>
+                            <pre class="bg-gray-100 p-2 rounded text-xs overflow-x-auto"><code>let age = 16;
+console.log(age);</code></pre>
+                        </div>
+                        <div>
+                            <span class="text-xs font-bold text-gray-500">Python</span>
+                            <pre class="bg-gray-100 p-2 rounded text-xs overflow-x-auto"><code>age = 16
+print(age)</code></pre>
+                        </div>
+                        <div>
+                            <span class="text-xs font-bold text-gray-500">Java (jshell)</span>
+                            <pre class="bg-gray-100 p-2 rounded text-xs overflow-x-auto"><code>int age = 16;
+System.out.println(age);</code></pre>
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-3 border-t border-dashed border-black pt-2">
+                        ⚠️ <span class="font-bold">Common mistake:</span> forgetting that
+                        <code>age</code> and <code>Age</code> are two different variables (all
+                        three languages care about case), and that Java makes you state the type
+                        (<code>int</code>, <code>String</code>) up front while Node and Python
+                        don't.
+                    </p>
                 </div>
+                <div class="border-2 border-black rounded-lg p-4">
+                    <span class="text-sm font-bold text-blue-500">Module 2</span>
+                    <h3 class="font-bold text-lg mt-1">Objects vs. Primitives</h3>
+                    <p class="text-sm text-gray-600 mt-1">
+                        Poking at numbers, strings, and booleans versus objects directly in the
+                        shell to build an intuition for what's a "plain value" and what's a
+                        container with its own properties.
+                    </p>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-2 mt-3">
+                        <div>
+                            <span class="text-xs font-bold text-gray-500">Node</span>
+                            <pre class="bg-gray-100 p-2 rounded text-xs overflow-x-auto"><code>typeof 16
+// "number"
+typeof { age: 16 }
+// "object"</code></pre>
+                        </div>
+                        <div>
+                            <span class="text-xs font-bold text-gray-500">Python</span>
+                            <pre class="bg-gray-100 p-2 rounded text-xs overflow-x-auto"><code>type(16)
+# &lt;class 'int'&gt;
+type({"age": 16})
+# &lt;class 'dict'&gt;</code></pre>
+                        </div>
+                        <div>
+                            <span class="text-xs font-bold text-gray-500">Java (jshell)</span>
+                            <pre class="bg-gray-100 p-2 rounded text-xs overflow-x-auto"><code>int x = 16;
+// primitive
+var obj = Map.of("age", 16);
+// object</code></pre>
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-3 border-t border-dashed border-black pt-2">
+                        ⚠️ <span class="font-bold">Common mistake:</span> assuming copying a
+                        variable that holds an object copies its contents too. In all three
+                        languages it actually copies a reference — change the object through one
+                        name and the other name sees the change as well.
+                    </p>
+                </div>
+                <div class="border-2 border-black rounded-lg p-4">
+                    <span class="text-sm font-bold text-blue-500">Module 3</span>
+                    <h3 class="font-bold text-lg mt-1">Functions</h3>
+                    <p class="text-sm text-gray-600 mt-1">
+                        Writing tiny one-line functions right in the shell, calling them, and
+                        seeing what they return — the smallest possible building block for
+                        reusable code.
+                    </p>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-2 mt-3">
+                        <div>
+                            <span class="text-xs font-bold text-gray-500">Node</span>
+                            <pre class="bg-gray-100 p-2 rounded text-xs overflow-x-auto"><code>function greet(name) {
+  return "Hi " + name;
+}
+greet("Sam");</code></pre>
+                        </div>
+                        <div>
+                            <span class="text-xs font-bold text-gray-500">Python</span>
+                            <pre class="bg-gray-100 p-2 rounded text-xs overflow-x-auto"><code>def greet(name):
+    return "Hi " + name
+
+greet("Sam")</code></pre>
+                        </div>
+                        <div>
+                            <span class="text-xs font-bold text-gray-500">Java (jshell)</span>
+                            <pre class="bg-gray-100 p-2 rounded text-xs overflow-x-auto"><code>String greet(String name) {
+  return "Hi " + name;
+}
+greet("Sam")</code></pre>
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-3 border-t border-dashed border-black pt-2">
+                        ⚠️ <span class="font-bold">Common mistake:</span> forgetting the
+                        <code>return</code> keyword and expecting a value to just "come out" of the
+                        function on its own. Without it, your function runs but hands back nothing
+                        useful.
+                    </p>
+                </div>
+                <div class="border-2 border-black rounded-lg p-4">
+                    <span class="text-sm font-bold text-blue-500">Module 4</span>
+                    <h3 class="font-bold text-lg mt-1">Control Flow: if/else and Loops</h3>
+                    <p class="text-sm text-gray-600 mt-1">
+                        Making decisions and repeating steps — the moment code stops just running
+                        top to bottom and starts actually "thinking" based on a value.
+                    </p>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-2 mt-3">
+                        <div>
+                            <span class="text-xs font-bold text-gray-500">Node</span>
+                            <pre class="bg-gray-100 p-2 rounded text-xs overflow-x-auto"><code>if (age >= 16) {
+  console.log("go for it");
+} else {
+  console.log("not yet");
+}
+for (let i = 0; i < 3; i++) {
+  console.log(i);
+}</code></pre>
+                        </div>
+                        <div>
+                            <span class="text-xs font-bold text-gray-500">Python</span>
+                            <pre class="bg-gray-100 p-2 rounded text-xs overflow-x-auto"><code>if age >= 16:
+    print("go for it")
+else:
+    print("not yet")
+
+for i in range(3):
+    print(i)</code></pre>
+                        </div>
+                        <div>
+                            <span class="text-xs font-bold text-gray-500">Java (jshell)</span>
+                            <pre class="bg-gray-100 p-2 rounded text-xs overflow-x-auto"><code>if (age >= 16) {
+  System.out.println("go for it");
+} else {
+  System.out.println("not yet");
+}
+for (int i = 0; i < 3; i++) {
+  System.out.println(i);
+}</code></pre>
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-3 border-t border-dashed border-black pt-2">
+                        ⚠️ <span class="font-bold">Common mistake:</span> mixing up
+                        <code>=</code> (assigns a value) with <code>==</code>/<code>===</code>
+                        (compares two values) inside an <code>if</code> condition — one of the most
+                        common bugs in every language on this list.
+                    </p>
+                </div>
+                <div class="border-2 border-black rounded-lg p-4">
+                    <span class="text-sm font-bold text-blue-500">Module 5</span>
+                    <h3 class="font-bold text-lg mt-1">Interpreted vs. Compiled Languages</h3>
+                    <p class="text-sm text-gray-600 mt-1">
+                        Why Node and Python let you run code line-by-line while Java normally needs
+                        to be compiled first — and why <code>jshell</code> gives Java that same
+                        instant, REPL-style feedback for this course.
+                    </p>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-2 mt-3">
+                        <div>
+                            <span class="text-xs font-bold text-gray-500">Node</span>
+                            <pre class="bg-gray-100 p-2 rounded text-xs overflow-x-auto"><code>node app.js
+// runs immediately</code></pre>
+                        </div>
+                        <div>
+                            <span class="text-xs font-bold text-gray-500">Python</span>
+                            <pre class="bg-gray-100 p-2 rounded text-xs overflow-x-auto"><code>python3 app.py
+# runs immediately</code></pre>
+                        </div>
+                        <div>
+                            <span class="text-xs font-bold text-gray-500">Java (jshell)</span>
+                            <pre class="bg-gray-100 p-2 rounded text-xs overflow-x-auto"><code>javac App.java
+java App
+// compile, then run
+// (jshell skips this for now)</code></pre>
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-3 border-t border-dashed border-black pt-2">
+                        ⚠️ <span class="font-bold">Common mistake:</span> expecting
+                        <code>jshell</code> to behave exactly like a real Java project. It's a
+                        REPL, not a compiler — once you write actual <code>.java</code> files,
+                        you'll need to run <code>javac</code> before <code>java</code>, and it will
+                        catch mistakes <code>jshell</code> doesn't.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- What's next -->
+        <div class="w-full md:w-4/5 max-w-5xl mb-6">
+            <div class="border-2 border-black rounded-lg p-4 bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 text-white">
+                <h2 class="font-bold text-lg">What's next?</h2>
+                <p class="text-sm mt-1">
+                    Once you're comfortable typing code directly into these shells, the next course
+                    picks up right where this one leaves off: writing your first real
+                    <code>.js</code>, <code>.py</code>, and <code>.java</code> files, saving them,
+                    and running them for real.
+                </p>
+            </div>
+        </div>
+
+        <div class="w-full md:w-4/5 max-w-5xl mb-10">
+            <div class="border-2 border-dashed border-black rounded p-4 text-center text-gray-600">
+                Full lesson materials and checkout coming soon.
             </div>
         </div>
     </div>
