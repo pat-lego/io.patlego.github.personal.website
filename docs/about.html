@@ -39,25 +39,17 @@
 <body>
     <!-- Include header -->
     <header x-data="{ open: false }">
-    <div class="hidden md:flex w-full justify-between items-center p-4 bg-black">
+    <div class="flex justify-between items-center p-4 bg-black">
         <h1 class="text-xl font-bold text-white">Pat Lego.com</h1>
-        <div class="flex-col">
-            <nav>
-                <ul class="flex space-x-4">
-                    <li><a class="hover:text-blue-500 text-white" href="/">Home</a></li>
-                    <li><a class="hover:text-blue-500 text-white" href="/about.html">About</a></li>
-                    <li><a class="hover:text-blue-500 text-white" href="/blogs.html">Blogs</a></li>
-                    <li><a class="hover:text-blue-500 text-white" target="_blank"
-                            href="https://patrique.gumroad.com/l/sslji">Store</a></li>
-                </ul>
-            </nav>
-        </div>
-    </div>
-    <!-- Mobile View -->
-    <div class="flex md:hidden w-full justify-between items-center p-4 bg-black">
-        <h1 class="text-xl font-bold text-white">Pat Lego.com</h1>
-        <button @click="open = !open" class="text-white focus:outline-none">
-            <!-- Icon for mobile menu button -->
+        <nav class="hidden md:block">
+            <ul class="flex space-x-4">
+                <li><a class="hover:text-blue-500 text-white" href="/">Home</a></li>
+                <li><a class="hover:text-blue-500 text-white" href="/about.html">About</a></li>
+                <li><a class="hover:text-blue-500 text-white" href="/blogs.html">Blogs</a></li>
+                <li><a class="hover:text-blue-500 text-white" href="/store.html">Store</a></li>
+            </ul>
+        </nav>
+        <button @click="open = !open" class="md:hidden text-white focus:outline-none">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                 xmlns="http://www.w3.org/2000/svg">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
@@ -72,49 +64,34 @@
                 <li><a class="hover:text-blue-500 text-white" href="/">Home</a></li>
                 <li><a class="hover:text-blue-500 text-white" href="/about.html">About</a></li>
                 <li><a class="hover:text-blue-500 text-white" href="/blogs.html">Blogs</a></li>
-                <li><a class="hover:text-blue-500 text-white" target="_blank" href="https://patrique.gumroad.com/l/sslji">Store</a></li>
+                <li><a class="hover:text-blue-500 text-white" href="/store.html">Store</a></li>
             </ul>
         </nav>
     </div>
 </header>
 
+
     <main>
         <!-- Include the about section -->
-        <section>
-    <!-- Desktop View -->
-    <div class="hidden md:flex justify-center items-center w-full">
-        <img src="assets/aboutme1x1.png" alt="Image description">
-        <div class="flex ml-16 items-center">
-            <ul>
-                <li><span class="font-bold">Name:</span> <span class="italic">Patrique Legault</span></li>
-                <li><span class="font-bold">Employer:</span> <span class="italic">Adobe</span></li>
-                <li><span class="font-bold">Role:</span> <span class="italic">Site Reliability Engineer</span></li>
-                <li><span class="font-bold">Passions:</span> <span class="italic">Cooking, Music and Coding</span>
-                </li>
-            </ul>
-        </div>
-    </div>
-    <!-- Mobile View -->
-    <div class="flex flex-col md:hidden justify-center items-center w-full">
-        <img src="assets/aboutme.png" alt="Image description" class="w-2/3 h-2/3">
-        <div class="flex mt-10 items-center">
-            <ul>
-                <li class="text-center"><span class="font-bold">Name:</span> <span class="italic">Patrique
-                        Legault</span></li>
-                <li class="text-center"><span class="font-bold">Employer:</span> <span class="italic">Adobe</span>
-                </li>
-                <li class="text-center"><span class="font-bold">Role:</span> <span class="italic">Technical Support
-                        Engineer</span></li>
-                <li class="text-center"><span class="font-bold">Passions:</span> <span class="italic">Cooking, Music
-                        and Coding</span></li>
+        <section class="flex justify-center w-full px-4">
+    <div class="flex flex-col md:flex-row justify-center items-center w-full max-w-3xl border-2 border-black rounded-2xl p-6 md:p-10 mt-3 mb-6">
+        <img src="assets/aboutme.png" alt="Image description" class="w-2/3 h-2/3 md:hidden">
+        <img src="assets/aboutme1x1.png" alt="Image description" class="hidden md:block">
+        <div class="flex mt-10 md:mt-0 md:ml-16 items-center">
+            <ul class="space-y-2">
+                <li class="text-center md:text-left">🙋 <span class="font-bold">Name:</span> <span class="italic">Patrique Legault</span></li>
+                <li class="text-center md:text-left">💼 <span class="font-bold">Employer:</span> <span class="italic">Adobe</span></li>
+                <li class="text-center md:text-left">🛠️ <span class="font-bold">Role:</span> <span class="italic">Site Reliability Engineer</span></li>
+                <li class="text-center md:text-left">🎧 <span class="font-bold">Passions:</span> <span class="italic">Cooking, Music and Coding</span></li>
             </ul>
         </div>
     </div>
 </section>
 
+
         <!-- Include the resume section -->
         <section>
-    <div class="bg-gray-50 min-h-screen flex items-center justify-center mt-5">
+    <div class="min-h-screen flex items-center justify-center mt-5">
         <div class="w-full md:w-1/2 max-w-4xl bg-white shadow-lg rounded-lg overflow-hidden">
             <div class="p-8">
                 <div class="space-y-8">

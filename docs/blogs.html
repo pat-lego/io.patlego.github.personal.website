@@ -39,25 +39,17 @@
 <body>
     <!-- Include header -->
     <header x-data="{ open: false }">
-    <div class="hidden md:flex w-full justify-between items-center p-4 bg-black">
+    <div class="flex justify-between items-center p-4 bg-black">
         <h1 class="text-xl font-bold text-white">Pat Lego.com</h1>
-        <div class="flex-col">
-            <nav>
-                <ul class="flex space-x-4">
-                    <li><a class="hover:text-blue-500 text-white" href="/">Home</a></li>
-                    <li><a class="hover:text-blue-500 text-white" href="/about.html">About</a></li>
-                    <li><a class="hover:text-blue-500 text-white" href="/blogs.html">Blogs</a></li>
-                    <li><a class="hover:text-blue-500 text-white" target="_blank"
-                            href="https://patrique.gumroad.com/l/sslji">Store</a></li>
-                </ul>
-            </nav>
-        </div>
-    </div>
-    <!-- Mobile View -->
-    <div class="flex md:hidden w-full justify-between items-center p-4 bg-black">
-        <h1 class="text-xl font-bold text-white">Pat Lego.com</h1>
-        <button @click="open = !open" class="text-white focus:outline-none">
-            <!-- Icon for mobile menu button -->
+        <nav class="hidden md:block">
+            <ul class="flex space-x-4">
+                <li><a class="hover:text-blue-500 text-white" href="/">Home</a></li>
+                <li><a class="hover:text-blue-500 text-white" href="/about.html">About</a></li>
+                <li><a class="hover:text-blue-500 text-white" href="/blogs.html">Blogs</a></li>
+                <li><a class="hover:text-blue-500 text-white" href="/store.html">Store</a></li>
+            </ul>
+        </nav>
+        <button @click="open = !open" class="md:hidden text-white focus:outline-none">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                 xmlns="http://www.w3.org/2000/svg">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
@@ -72,88 +64,39 @@
                 <li><a class="hover:text-blue-500 text-white" href="/">Home</a></li>
                 <li><a class="hover:text-blue-500 text-white" href="/about.html">About</a></li>
                 <li><a class="hover:text-blue-500 text-white" href="/blogs.html">Blogs</a></li>
-                <li><a class="hover:text-blue-500 text-white" target="_blank" href="https://patrique.gumroad.com/l/sslji">Store</a></li>
+                <li><a class="hover:text-blue-500 text-white" href="/store.html">Store</a></li>
             </ul>
         </nav>
     </div>
 </header>
 
+
     <main>
-        <section>
-    <!-- Desktop View -->
-    <div class="hidden md:flex w-full">
-        <div class="flex flex-col justify-start w-1/5 border-r-2 border-black min-h-screen" x-data="getBlogs">
-            <div class="flex flex-row mt-2 justify-start">
-                <span class="mr-2">Search:</span>
-                <input type="text" class="w-full border-b-2 border-black" placeholder="Search" x-ref="searchInput" x-model="search"
-                    x-on:keydown.window.prevent.slash="$refs.searchInput.focus()" />
-            </div>
-            <li class="w-full list-none mt-5">
-                <template x-for="blog in filteredBlogs">
-                    <ul class="ml-5 hover:underline" x-on:click="loadBlog(blog)" x-text="blog.name">
-                    </ul>
-                </template>
-            </li>
-        </div>
-        <div id="blog" class="flex w-4/5 justify-center">
-            <div class="min-h-screen flex items-center">
-                Start your first read 😊
-            </div>
-        </div>
+        <section class="flex flex-col items-center w-full" x-data="getBlogs">
+    <div class="flex flex-col items-center w-full mt-5 mb-3 px-4">
+        <h1 class="text-2xl md:text-3xl font-bold text-center">Blogs</h1>
+        <p class="text-center text-gray-600 mt-2 max-w-xl">Notes and write-ups on things I've run into building and
+            running software.</p>
+        <input type="text" class="w-full max-w-md mt-4 border-b-2 border-black p-1" placeholder="Search blogs"
+            x-ref="searchInput" x-model="search" x-on:keydown.window.prevent.slash="$refs.searchInput.focus()" />
     </div>
-    <!-- Mobile View-->
-    <div class="flex flex-col md:hidden w-full">
-        <div class="flex justify-center m-5 text-2xl">
-            <h1>Select a blog to read</h1>
-        </div>
-        <div class="flex flex-col justify-center items-center w-full" x-data="getBlogs">
-            <div class="flex flex-col justify-start items-start">
-                <span class="mr-2 text-xl font-bold">Type a blog title</span>
-                <input type="text" class="w-full border-b-2 border-black" placeholder="Search" x-ref="searchInput" x-model="search"
-                    x-on:keydown.window.prevent.slash="$refs.searchInput.focus()" />
-            </div>
-            <div class="flex w-4/5 min-h-screen border-black justify-center">
-                <ul class="list-none">
-                    <template x-for="blog in filteredBlogs">
-                        <li  class="m-2 text-2xl hover:bg-black hover:text-white block p-2" x-on:click="mobileClick(blog.url)"
-                            x-text="blog.name">
-                        </li>
-                    </template>
-                </ul>
-            </div>
-        </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 w-full max-w-6xl px-4 pb-10">
+        <template x-for="blog in filteredBlogs" :key="blog.url">
+            <a :href="`/blogs${blog.url}`"
+                class="flex flex-col border-2 border-black rounded-lg overflow-hidden p-4 hover:bg-black hover:text-white group">
+                <h2 class="font-bold text-lg" x-text="blog.name"></h2>
+                <p class="text-sm text-gray-600 group-hover:text-gray-300 mt-1 flex-1" x-text="blog.description"></p>
+                <span class="mt-4 text-sm font-bold">Read &rarr;</span>
+            </a>
+        </template>
+    </div>
+
+    <div class="flex w-full justify-center pb-10" x-show="filteredBlogs.length === 0">
+        <p class="text-gray-600">No blogs match your search.</p>
     </div>
 </section>
 <script>
-    function mobileClick(url) {
-        document.location.href = `/blogs${url}`;
-    };
-    function loadBlog(e) {
-        fetch(`/blogs/partials${e.url}`)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok ' + response.statusText);
-                }
-                return response.text().then(data => ({
-                    status: response.status,
-                    data: data
-                }));
-            })
-            .then(result => {
-                console.log('Status:', result.status);
-                document.getElementById('blog').innerHTML = result.data;
-            })
-            .catch(error => {
-                console.error('Fetch error:', error);
-                document.getElementById('blog').innerHTML = `
-                 <main>
-                    <div class="flex flex-col items-center justify-center min-h-screen">
-                        <h1 class="font-bold">I couldn't find that blog...</h1>
-                    </div>
-                </main>
-                `;
-            });
-    };
     function getBlogs() {
         return {
             search: '',
@@ -169,21 +112,21 @@
         };
     };
     const blogs = [
-        { name: 'Git Init', url: '/blog-1.html' },
-        { name: 'Herding Cats: Ordered Job Processing', url: '/guarded-job-management.html' },
-        { name: 'HTTPD and Networking', url: '/proxying-with-advancednetworking-and-dispatcher.html' },
-        { name: 'includePropertyTypes in AEM Indexes', url: '/include-property-types.html' },
-        { name: 'Review the AEM Archetype', url: '/aem-archetype-and-preventing-errors.html' },
-        { name: 'SAML Symmetry', url: '/saml-request-response-symmetry.html' },
-        { name: 'Thread starvation?', url: '/what-is-thread-starvation.html' },
-        { name: 'Where is my workflow?', url: '/queueing-and-processing.html' },
-        { name: 'Asynchronous Deadlock', url: '/always-provide-an-executor.html' },
-        { name: 'Death by Sling Model', url: '/algolia-postconstruct-thread-starvation.html' },
-        { name: 'JVM thread starvation caused by sling model', url: '/sling-model-query-abuse.html' },
-        { name: 'Java makes it easy to write bad code', url: '/java-makes-it-easy-to-write-bad-code.html' }
+        { name: 'Git Init', url: '/blog-1.html', description: 'Kicking off the blog.' },
+        { name: 'Herding Cats: Ordered Job Processing', url: '/guarded-job-management.html', description: 'A deep dive into Guarded Job Management, a distributed job processing system for AEM that guarantees ordered execution of jobs across multiple instances using cryptographically-signed tokens.' },
+        { name: 'HTTPD and Networking', url: '/proxying-with-advancednetworking-and-dispatcher.html', description: 'AEM as a Cloud Service Dispatcher and Advanced Networking.' },
+        { name: 'includePropertyTypes in AEM Indexes', url: '/include-property-types.html', description: 'How includePropertyTypes affects full text query results with CONTAINS in JCR-SQL2.' },
+        { name: 'Review the AEM Archetype', url: '/aem-archetype-and-preventing-errors.html', description: 'Leveraging the AEM Archetype to prevent runtime errors.' },
+        { name: 'SAML Symmetry', url: '/saml-request-response-symmetry.html', description: 'SAML Authentication in AEM requires the content to come back to the original SAML request or else HTTP 422 errors may occur.' },
+        { name: 'Thread starvation?', url: '/what-is-thread-starvation.html', description: 'Learn about thread starvation and how it can affect your JVM\'s performance, or worse, cause it to crash.' },
+        { name: 'Where is my workflow?', url: '/queueing-and-processing.html', description: 'Many things in AEM get queued for processing; understanding why a queue stops processing entries.' },
+        { name: 'Asynchronous Deadlock', url: '/always-provide-an-executor.html', description: 'Why asynchronous Java code in AEM needs an explicit executor.' },
+        { name: 'Death by Sling Model', url: '/algolia-postconstruct-thread-starvation.html', description: 'Creating an Algolia SearchClient inside a Sling Model @PostConstruct leaks I/O dispatcher threads on every request.' },
+        { name: 'JVM thread starvation caused by sling model', url: '/sling-model-query-abuse.html', description: 'Running a JCR query in every Sling Model @PostConstruct turns a single page render into a burst of Lucene file I/O.' },
+        { name: 'Java makes it easy to write bad code', url: '/java-makes-it-easy-to-write-bad-code.html', description: 'Synchronized, unbounded collections, and HttpClient\'s missing default timeouts make it trivial to starve a servlet container\'s thread pool.' }
     ];
 </script>
-</script>
+
     </main>
 
     <!-- Include footer -->

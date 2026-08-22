@@ -1,9 +1,47 @@
-<main class="flex flex-col items-center justify-center w-full h-screen text-center">
-    <h1 class="font-bold mb-4 text-2xl">Pat Legault's Website</h1>
-    <img src="assets/engineer-debugging.jpg" alt="Software Engineering" class="object-cover mb-4">
-    <div class="mt-5 w-2/3">
-        <p class="italic">My name is Patrique and I am a Site Reliability Engineer. I have a passion for coding and I am always
-        looking for new challenges. I am currently working at <a href="https://www.adobe.com/" target="_blank"
-            class="text-blue-500">Adobe</a> as an SRE for AEMaaCS.</p>
-    </div>
+<main class="flex flex-col items-center w-full px-4">
+    <!-- Hero -->
+    <section class="flex flex-col items-center w-full max-w-3xl text-center bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 text-white rounded-2xl p-6 md:p-10 mt-3 shadow-lg">
+        <span class="text-3xl md:text-4xl">👋</span>
+        <h1 class="font-bold mt-2 text-2xl md:text-4xl">Hey, I'm Patrique!</h1>
+        <img src="assets/engineer-debugging.jpg" alt="Patrique Legault debugging"
+            class="object-cover mt-5 mb-5 w-40 h-40 md:w-52 md:h-52 rounded-full border-4 border-white shadow-md">
+        <p class="text-base md:text-lg">
+            Site Reliability Engineer by day, chronic bug-chaser by night. I keep <a
+                href="https://www.adobe.com/" target="_blank" class="underline font-bold">Adobe</a>'s AEMaaCS
+            fleet happy, and I write about the weird stuff I learn along the way.
+        </p>
+        <div class="flex flex-wrap justify-center gap-2 mt-5">
+            <span class="bg-white/20 rounded-full px-3 py-1 text-sm">☕ Coffee-powered</span>
+            <span class="bg-white/20 rounded-full px-3 py-1 text-sm">🧵 Thread starvation whisperer</span>
+            <span class="bg-white/20 rounded-full px-3 py-1 text-sm">🐛 Bug hunter</span>
+            <a href="https://open.spotify.com/search/90s%20grunge%20pop%20punk" target="_blank"
+                class="bg-white/20 rounded-full px-3 py-1 text-sm hover:bg-white/40">🎸 Music nerd (grunge &amp;
+                pop-punk)</a>
+        </div>
+    </section>
+
+    <!-- Quick links -->
+    <section class="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full max-w-3xl mt-4 mb-6">
+        <a href="/about.html"
+            class="flex flex-col items-center border-2 border-black rounded-lg p-5 hover:bg-black hover:text-white group">
+            <span class="text-2xl">🙋</span>
+            <span class="font-bold mt-2">About Me</span>
+            <span class="text-sm text-gray-600 group-hover:text-gray-300 mt-1 text-center">Who I am and what I
+                do.</span>
+        </a>
+        <a href="/blogs.html"
+            class="flex flex-col items-center border-2 border-black rounded-lg p-5 hover:bg-black hover:text-white group">
+            <span class="text-2xl">📝</span>
+            <span class="font-bold mt-2">Blogs</span>
+            <span class="text-sm text-gray-600 group-hover:text-gray-300 mt-1 text-center">War stories from
+                production.</span>
+        </a>
+        <a href="/store.html"
+            class="flex flex-col items-center border-2 border-black rounded-lg p-5 hover:bg-black hover:text-white group">
+            <span class="text-2xl">🛒</span>
+            <span class="font-bold mt-2">Store</span>
+            <span class="text-sm text-gray-600 group-hover:text-gray-300 mt-1 text-center">Guides and courses I've
+                built.</span>
+        </a>
+    </section>
 </main>

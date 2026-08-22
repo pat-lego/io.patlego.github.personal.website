@@ -61,6 +61,20 @@ export const htmlBlogs = () => {
     .pipe(browser.stream());
 };
 
+// Task to include HTML partials for store product pages
+export const htmlStore = () => {
+  return gulp
+    .src('src/store/**/*.html')
+    .pipe(
+      fileInclude({
+        prefix: '@@',
+        basepath: '@file',
+      })
+    )
+    .pipe(gulp.dest('docs/store'))
+    .pipe(browser.stream());
+};
+
 // Task to process CSS using PostCSS
 export const css = () => {
   return gulp
@@ -86,16 +100,16 @@ export const watch = () => {
     },
   });
 
-  gulp.watch(paths.html.src, gulp.series(css, htmlBlogs, htmlPages));
+  gulp.watch(paths.html.src, gulp.series(css, htmlBlogs, htmlStore, htmlPages));
   gulp.watch(paths.assets.src, assets);
 };
 
 
 // Default task executed by running yarn gulp
-export default gulp.series(dlte, gulp.parallel(css, htmlBlogs, htmlPages, assets), watch);
+export default gulp.series(dlte, gulp.parallel(css, htmlBlogs, htmlStore, htmlPages, assets), watch);
 
 // can be executed by yarn gulp build
-export const build = gulp.series(dlte, gulp.parallel(css, htmlBlogs, htmlPages, assets));
+export const build = gulp.series(dlte, gulp.parallel(css, htmlBlogs, htmlStore, htmlPages, assets));
 
 export const deploy = gulp.series(build, () => {
   return gulp.src(paths.cname.src)
