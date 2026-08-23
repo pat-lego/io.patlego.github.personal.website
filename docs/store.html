@@ -125,6 +125,7 @@
                             <h3 class="font-bold text-lg" x-text="course.name"></h3>
                         </a>
                         <span class="text-sm text-blue-500 font-bold mt-1" x-text="formatDate(course.startDate)"></span>
+                        <span class="text-xs text-gray-500 mt-1" x-text="course.duration || 'Duration TBD'"></span>
                         <p class="text-sm text-gray-600 mt-1 flex-1" x-text="course.description"></p>
                         <div class="flex items-center justify-between mt-4">
                             <span class="font-bold" x-text="course.price"></span>
@@ -159,13 +160,13 @@
             description: 'A beginner programming course for high schoolers, starting with the Node, Python, and Java shells.',
             price: '$100', image: '/assets/intro-to-dev-cartoon.svg', url: '/store/intro-to-dev.html',
             buyLabel: 'View Curriculum', paymentUrl: 'https://book.stripe.com/28EcN66v4gaLc2n7GsfMA00',
-            location: '186 Meadowbrook Road Azilda, ON, P0M 1B0', startDate: '2026-10-03', secret: false, preview: false
+            location: '186 Meadowbrook Road Azilda, ON, P0M 1B0', startDate: '2026-10-03', duration: '3 hours', secret: false, preview: false
         },
         {
             slug: 'basics-of-development', type: 'course', name: 'Basics of Development',
             description: 'The follow-up to Intro to Dev: build a real Checkers game in Node, Python, or Java.',
             price: 'Price TBD', image: '/assets/checkers-cartoon.svg', url: '/store/basics-of-development.html',
-            buyLabel: 'View Curriculum', paymentUrl: null, location: null, startDate: null, secret: false, preview: true
+            buyLabel: 'View Curriculum', paymentUrl: null, location: null, startDate: null, duration: null, secret: false, preview: true
         }
     ];
     function getStore() {

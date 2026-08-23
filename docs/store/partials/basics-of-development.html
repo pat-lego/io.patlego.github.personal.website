@@ -12,13 +12,13 @@
                 description: 'A beginner programming course for high schoolers, starting with the Node, Python, and Java shells.',
                 price: '$100', image: '/assets/intro-to-dev-cartoon.svg', url: '/store/intro-to-dev.html',
                 buyLabel: 'View Curriculum', paymentUrl: 'https://book.stripe.com/28EcN66v4gaLc2n7GsfMA00',
-                location: '186 Meadowbrook Road Azilda, ON, P0M 1B0', startDate: '2026-10-03', secret: false, preview: false
+                location: '186 Meadowbrook Road Azilda, ON, P0M 1B0', startDate: '2026-10-03', duration: '3 hours', secret: false, preview: false
             },
             {
                 slug: 'basics-of-development', type: 'course', name: 'Basics of Development',
                 description: 'The follow-up to Intro to Dev: build a real Checkers game in Node, Python, or Java.',
                 price: 'Price TBD', image: '/assets/checkers-cartoon.svg', url: '/store/basics-of-development.html',
-                buyLabel: 'View Curriculum', paymentUrl: null, location: null, startDate: null, secret: false, preview: true
+                buyLabel: 'View Curriculum', paymentUrl: null, location: null, startDate: null, duration: null, secret: false, preview: true
             }
         ];
     </script>
@@ -33,6 +33,7 @@
                 <a href="/store.html" class="text-sm text-blue-500 hover:underline mb-2">&larr; Back to Store</a>
                 <h1 class="font-bold text-2xl md:text-3xl">Basics of Development</h1>
                 <p class="text-blue-500 font-bold mt-2">Date TBD</p>
+                <p class="text-sm text-gray-600 mt-1" x-text="`Duration: ${product.duration || 'TBD'}`"></p>
                 <p class="font-bold text-xl mt-1">Price TBD</p>
                 <p class="mt-4 text-base md:text-lg">
                     The follow-up to <a href="/store/intro-to-dev.html" class="text-blue-500 underline">Intro to
@@ -58,10 +59,14 @@
                 resume &rarr;</a>
         </div>
 
-        <!-- Course Details: every course page needs Payment, Location, and What to Bring -->
+        <!-- Course Details: every course page needs Duration, Payment, Location, and What to Bring -->
         <div class="w-full md:w-4/5 max-w-5xl mt-8">
             <h2 class="text-xl md:text-2xl font-bold mb-3 text-center md:text-left">Course Details</h2>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div class="border-2 border-black rounded-lg p-4">
+                    <h3 class="font-bold text-lg">⏱️ Duration</h3>
+                    <p class="text-sm text-gray-600 mt-1" x-text="product.duration || 'Duration TBD'"></p>
+                </div>
                 <div class="border-2 border-black rounded-lg p-4">
                     <h3 class="font-bold text-lg">💳 Payment</h3>
                     <a :href="product.paymentUrl" target="_blank" x-show="product.paymentUrl"
