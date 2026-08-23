@@ -46,7 +46,7 @@
                 ❌ Without an Executor — runs in the Common Pool (dangerous)
             </p>
             <div class="m-5 flex align-center justify-center">
-                <div class="bg-gray-900 text-green-400 font-mono text-sm p-4 rounded-lg overflow-x-scroll w-2/3">/ No executor provided — CompletableFuture uses ForkJoinPool.commonPool()
+                <div class="bg-gray-900 text-green-400 font-mono text-sm p-4 rounded-lg overflow-x-scroll w-full lg:w-2/3">/ No executor provided — CompletableFuture uses ForkJoinPool.commonPool()
 // All tasks share the same fixed-size pool (# processors - 1 threads)
 // If these tasks wait on each other, the pool deadlocks
 
@@ -65,7 +65,7 @@ CompletableFuture&lt;String&gt; outer = CompletableFuture.supplyAsync(() -&gt; {
                 ✅ With a dedicated Executor — isolated from the Common Pool (safe)
             </p>
             <div class="m-5 flex align-center justify-center">
-                <div class="bg-gray-900 text-green-400 font-mono text-sm p-4 rounded-lg overflow-x-scroll w-2/3">// Dedicated thread pool — completely separate from ForkJoinPool.commonPool()
+                <div class="bg-gray-900 text-green-400 font-mono text-sm p-4 rounded-lg overflow-x-scroll w-full lg:w-2/3">// Dedicated thread pool — completely separate from ForkJoinPool.commonPool()
 // Size it based on your workload: I/O-bound tasks can use more threads than CPU cores
 ExecutorService executor = Executors.newFixedThreadPool(10);
 

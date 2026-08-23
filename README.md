@@ -121,35 +121,51 @@ Same three-piece pattern as blogs, under `src/store/` instead of `src/blogs/`:
 2. **The content partial** — `src/store/partials/<slug>.html` with the product/course detail
    layout (image, description, price, buy/curriculum link). Include a "← Back to Store" link like
    the existing entries.
-3. **A listing entry** — add an object to the `products` array at the bottom of
-   `src/partials/pages/store.html`:
+
+   **Every `type: 'course'` page must include:**
+   (see `src/store/partials/intro-to-dev.html` for a working example)
+   - **🙋 About the Instructor** — a 2-line summary of the teacher and why they're a good fit to
+     teach this course, plus a link to `/resume.html`.
+   - **A "Course Details" section with three parts:**
+     - **💳 Payment** — the payment/checkout link once you have one; show a "not live yet"
+       placeholder until then.
+     - **📍 Location** — where it's held; `TBD` is fine as a placeholder.
+     - **🎒 What to Bring** — what a student needs to show up with (e.g. a Windows or Mac laptop
+       with its power cable, plus anything else required).
+3. **A listing entry** — add an object to the `products` array, written directly inline in a
+   `<script>` tag (same pattern as the `blogs` array in `src/partials/pages/blogs.html` — no JSON
+   file, no fetch, just a plain JS array baked straight into the page). This array currently
+   appears in three places and must be kept in sync by hand:
+   - `src/partials/pages/store.html` — renders the Content and Courses sections on `/store.html`.
+   - `src/store/partials/intro-to-dev.html` — reads its own entry (matched by `slug`) to populate
+     its Payment and Location cards.
+   - `src/store/partials/basics-of-development.html` — same, for that course.
 
 ```html
 <script>
     const products = [
         {
-            slug: 'advanced-dev-course',       // must match src/store/<slug>.html
-            type: 'course',                    // 'content' (Content section) or 'course' (Courses section)
-            name: 'Advanced Dev',
+            slug: 'advanced-dev-course', type: 'course', name: 'Advanced Dev',
             description: 'A follow-up course to Intro to Dev.',
-            price: '$150',
-            image: '/assets/intro-to-dev-cartoon.svg',
-            url: '/store/advanced-dev-course.html',   // external link (e.g. Gumroad) or an on-site page
-            buyLabel: 'View Curriculum',               // optional, defaults to "Buy Now"
-            startDate: '2027-01-10',                   // courses only — used to sort soonest-first
-            secret: false,                              // see flags below
-            preview: false                              // see flags below
+            price: '$150', image: '/assets/intro-to-dev-cartoon.svg', url: '/store/advanced-dev-course.html',
+            buyLabel: 'View Curriculum', paymentUrl: 'https://book.stripe.com/your-link-here',
+            location: null, startDate: '2027-01-10', secret: false, preview: false
         }
+        // ...existing entries
     ];
 </script>
 ```
 
+- `slug` must match the filename you gave `src/store/<slug>.html`.
 - `type: 'content'` items render in the **Content** section (simple list, appears first — no
-  particular visual polish needed).
-- `type: 'course'` items render in the **Courses** section (card grid, sorted so the item with the
-  soonest `startDate` shows first; items without a `startDate` sort last and show "Date TBD").
-- If `url` starts with `http`, the buy/details link opens in a new tab; otherwise it's treated as
-  an on-site page and opens in the same tab.
+  particular visual polish needed). `type: 'course'` items render in the **Courses** section
+  (card grid, sorted so the item with the soonest `startDate` shows first; items without a
+  `startDate` sort last and show "Date TBD").
+- If `url` starts with `http`, the card's buy/details link opens in a new tab; otherwise it's
+  treated as an on-site page and opens in the same tab.
+- `paymentUrl` — the Stripe (or other) checkout link. Set it to `null` to show a "Payment link is
+  not live yet" placeholder on the course's Payment card instead of a working button.
+- `location` — shown on the course's Location card; set it to `null` to show `TBD` instead.
 
 ### `secret` and `preview` flags
 
@@ -165,15 +181,10 @@ Both are optional booleans on a `products` entry:
 <script>
     const products = [
         {
-            slug: 'advanced-dev-course',
-            type: 'course',
-            name: 'Advanced Dev',
+            slug: 'advanced-dev-course', type: 'course', name: 'Advanced Dev',
             description: 'A follow-up course to Intro to Dev.',
-            price: '$150',
-            image: '/assets/intro-to-dev-cartoon.svg',
-            url: '/store/advanced-dev-course.html',
-            buyLabel: 'View Curriculum',
-            startDate: '2027-01-10',
+            price: '$150', image: '/assets/intro-to-dev-cartoon.svg', url: '/store/advanced-dev-course.html',
+            buyLabel: 'View Curriculum', paymentUrl: null, location: null, startDate: '2027-01-10',
             secret: true,   // not rendered at all until this is removed/set to false
             preview: true   // ready for when secret flips to false — will show greyed out + "Coming Soon"
         }

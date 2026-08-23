@@ -1,5 +1,29 @@
 <section>
-    <div class="flex flex-col items-center min-h-screen w-full px-4">
+    <script>
+        const products = [
+            {
+                slug: 'surviving-technical-support', type: 'content', name: 'A Guide to Surviving Technical Support',
+                description: 'Practical strategies and lessons for working in and around technical support roles.',
+                price: 'Free', image: '/assets/support-cartoon.svg', url: 'https://patrique.gumroad.com/l/sslji',
+                buyLabel: 'Get it Free', paymentUrl: null, location: null, startDate: null, secret: false, preview: false
+            },
+            {
+                slug: 'intro-to-dev', type: 'course', name: 'Intro to Dev',
+                description: 'A beginner programming course for high schoolers, starting with the Node, Python, and Java shells.',
+                price: '$100', image: '/assets/intro-to-dev-cartoon.svg', url: '/store/intro-to-dev.html',
+                buyLabel: 'View Curriculum', paymentUrl: 'https://book.stripe.com/28EcN66v4gaLc2n7GsfMA00',
+                location: '186 Meadowbrook Road Azilda, ON, P0M 1B0', startDate: '2026-10-03', secret: false, preview: false
+            },
+            {
+                slug: 'basics-of-development', type: 'course', name: 'Basics of Development',
+                description: 'The follow-up to Intro to Dev: build a real Checkers game in Node, Python, or Java.',
+                price: 'Price TBD', image: '/assets/checkers-cartoon.svg', url: '/store/basics-of-development.html',
+                buyLabel: 'View Curriculum', paymentUrl: null, location: null, startDate: null, secret: false, preview: true
+            }
+        ];
+    </script>
+    <div class="flex flex-col items-center min-h-screen w-full px-4"
+        x-data="{ product: products.find(p => p.slug === 'intro-to-dev') || {} }">
         <div class="flex flex-col md:flex-row w-full md:w-4/5 mt-5 md:mt-10 max-w-5xl">
             <div class="w-full md:w-1/2 flex justify-center mb-5 md:mb-0">
                 <img src="/assets/intro-to-dev-cartoon.svg" alt="Intro to Dev"
@@ -17,6 +41,55 @@
                     shells to see what code actually does before worrying about building anything
                     real.
                 </p>
+            </div>
+        </div>
+
+        <!-- About the Instructor -->
+        <div class="w-full md:w-4/5 max-w-5xl mt-8 border-2 border-black rounded-lg p-4">
+            <h2 class="font-bold text-lg">🙋 About the Instructor</h2>
+            <p class="text-sm text-gray-600 mt-1">
+                Taught by Patrique Legault, a Site Reliability Engineer at Adobe with over a decade
+                debugging and building software professionally in Java, Python, and JavaScript.
+                He's spent that career explaining complex technical problems in plain language to
+                engineers and customers alike — exactly the skill needed to make programming click
+                for a first-time student.
+            </p>
+            <a href="/resume.html" class="text-sm text-blue-500 hover:underline mt-2 inline-block">View my
+                resume &rarr;</a>
+        </div>
+
+        <!-- Course Details: every course page needs Payment, Location, and What to Bring -->
+        <div class="w-full md:w-4/5 max-w-5xl mt-8">
+            <h2 class="text-xl md:text-2xl font-bold mb-3 text-center md:text-left">Course Details</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="border-2 border-black rounded-lg p-4">
+                    <h3 class="font-bold text-lg">💳 Payment</h3>
+                    <p class="text-sm text-gray-600 mt-1">
+                        $100, paid securely through Stripe.
+                    </p>
+                    <a :href="product.paymentUrl" target="_blank" x-show="product.paymentUrl"
+                        class="mt-3 inline-block bg-black text-white text-center px-4 py-2 rounded hover:bg-blue-500 text-sm w-full">
+                        Register Now
+                    </a>
+                    <p x-show="!product.paymentUrl" class="text-sm text-gray-500 mt-3 italic">
+                        Payment link is not live yet.
+                    </p>
+                </div>
+                <div class="border-2 border-black rounded-lg p-4">
+                    <h3 class="font-bold text-lg">📍 Location</h3>
+                    <a :href="`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(product.location)}`"
+                        target="_blank" x-show="product.location"
+                        class="text-sm text-blue-500 hover:underline mt-1 inline-block" x-text="product.location"></a>
+                    <p x-show="!product.location" class="text-sm text-gray-600 mt-1">TBD.</p>
+                </div>
+                <div class="border-2 border-black rounded-lg p-4">
+                    <h3 class="font-bold text-lg">🎒 What to Bring</h3>
+                    <p class="text-sm text-gray-600 mt-1">
+                        A laptop (Windows or Mac) with its power cable. No software installs needed
+                        ahead of time — we'll get Node, Python, and Java set up together on day
+                        one.
+                    </p>
+                </div>
             </div>
         </div>
 
@@ -261,10 +334,5 @@ java App
             </div>
         </div>
 
-        <div class="w-full md:w-4/5 max-w-5xl mb-10">
-            <div class="border-2 border-dashed border-black rounded p-4 text-center text-gray-600">
-                Full lesson materials and checkout coming soon.
-            </div>
-        </div>
     </div>
 </section>
