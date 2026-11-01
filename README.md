@@ -68,6 +68,8 @@ Every page follows the same include pattern (via `gulp-file-include`, prefix `@@
   `docs/blogs/<slug>.html`, and fails the build if an entry is invalid or its partial is missing.
 - `htmlStore` — compiles `src/store/**/*.html` (including its `partials/`) into `docs/store`.
 - `assets` — copies `src/assets/**/*` into `docs/assets`.
+- `js` — copies `src/js/**/*.js` into `docs/js`. Shared scripts go here and are loaded with
+  `<script src>`, so changing one does not rewrite every generated page.
 - `watch` — serves `docs/` with browser-sync and re-runs the tasks above on file changes.
 
 Running `yarn start` (or bare `gulp`) wipes `docs/`, runs all of the above once, then watches for
@@ -118,8 +120,8 @@ a slug without a matching partial stops the build with an error naming the entry
 
 ### Linking to a section of a blog post
 
-Every `<h2>` inside `<main>` on a blog post gets a link icon next to it (script in
-`src/partials/blog-section-links.html`, included only by `src/blogs/_post-template.html`). Clicking it copies the section URL, e.g.
+Every `<h2>` inside `<main>` on a blog post gets a link icon next to it (script
+`src/js/blog-section-links.js`, loaded only by `src/blogs/_post-template.html`). Clicking it copies the section URL, e.g.
 `https://www.patlego.com/blogs/slow-activation-could-not-obtain-lock.html#how-to-avoid-it`, and opening
 that URL jumps straight to the section.
 

@@ -24,6 +24,10 @@ const paths = {
     src: 'src/assets/**/*',
     dest: 'docs/assets/',
   },
+  js: {
+    src: 'src/js/**/*.js',
+    dest: 'docs/js/',
+  },
   cname: {
     src: 'CNAME',
     dest: 'docs',
@@ -179,6 +183,13 @@ export const assets = () => {
     .pipe(gulp.dest(paths.assets.dest));
 };
 
+// Task to copy shared scripts (loaded with <script src>, so they are not copied into every page)
+export const js = () => {
+  return gulp.src(paths.js.src)
+    .pipe(gulp.dest(paths.js.dest))
+    .pipe(browser.stream());
+};
+
 // Task to serve files with live reload
 export const watch = () => {
   browser.init({
@@ -189,14 +200,15 @@ export const watch = () => {
 
   gulp.watch([paths.html.src, BLOGS_JSON], gulp.series(css, htmlBlogs, htmlStore, htmlPages));
   gulp.watch(paths.assets.src, assets);
+  gulp.watch(paths.js.src, gulp.series(js, css));
 };
 
 
 // Default task executed by running yarn gulp
-export default gulp.series(dlte, gulp.parallel(css, htmlBlogs, htmlStore, htmlPages, assets), watch);
+export default gulp.series(dlte, gulp.parallel(css, htmlBlogs, htmlStore, htmlPages, assets, js), watch);
 
 // can be executed by yarn gulp build
-export const build = gulp.series(dlte, gulp.parallel(css, htmlBlogs, htmlStore, htmlPages, assets));
+export const build = gulp.series(dlte, gulp.parallel(css, htmlBlogs, htmlStore, htmlPages, assets, js));
 
 export const deploy = gulp.series(build, () => {
   return gulp.src(paths.cname.src)

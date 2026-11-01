@@ -1,5 +1,5 @@
 export default {
-    content: ['./src/**/*.html'], // Path to your HTML files
+    content: ['./src/**/*.html', './src/js/**/*.js'], // HTML files, plus scripts that add classes at runtime
     theme: {
       extend: {},
     },
