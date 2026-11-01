@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    @@include('../partials/head.html')
+    <link rel="canonical" href="{{url}}" />
+
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="{{title}}" />
+    <meta property="og:description" content="{{description}}" />
+    <meta property="og:url" content="{{url}}" />
+{{imageMeta}}
+    <meta property="og:image:alt" content="{{title}}" />
+    <meta property="article:author" content="Patrique Legault" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="{{title}}" />
+    <meta name="twitter:description" content="{{description}}" />
+    <meta name="twitter:image" content="{{image}}" />
+</head>
+
+<body>
+    <div>
+        <!-- Include header -->
+        @@include('../partials/header.html')
+    </div>
+
+    <main>
+        @@include('partials/{{slug}}.html')
+    </main>
+
+    <!-- Include footer -->
+    @@include('../partials/footer.html')
+
+    <!-- Link icon next to each section heading, for sharing /blogs/<slug>.html#section links -->
+    @@include('../partials/blog-section-links.html')
+</body>
+
+</html>

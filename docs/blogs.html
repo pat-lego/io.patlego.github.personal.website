@@ -82,11 +82,11 @@
     </div>
 
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 w-full max-w-6xl px-4 pb-10">
-        <template x-for="blog in filteredBlogs" :key="blog.url">
-            <a :href="`/blogs${blog.url}`"
+        <template x-for="blog in filteredBlogs" :key="blog.slug">
+            <a :href="`/blogs/${blog.slug}.html`"
                 class="flex flex-col border-2 border-black rounded-lg overflow-hidden p-4 hover:bg-black hover:text-white group">
                 <h2 class="font-bold text-lg" x-text="blog.name"></h2>
-                <p class="text-sm text-gray-600 group-hover:text-gray-300 mt-1 flex-1" x-text="blog.description"></p>
+                <p class="text-sm text-gray-600 group-hover:text-gray-300 mt-1 flex-1" x-text="blog.summary"></p>
                 <span class="mt-4 text-sm font-bold">Read &rarr;</span>
             </a>
         </template>
@@ -111,20 +111,100 @@
             },
         };
     };
+    // Single source of truth for posts: src/blogs/blogs.json (also drives the generated post pages).
     const blogs = [
-        { name: 'Git Init', url: '/blog-1.html', description: 'Kicking off the blog.' },
-        { name: 'Herding Cats: Ordered Job Processing', url: '/guarded-job-management.html', description: 'A deep dive into Guarded Job Management, a distributed job processing system for AEM that guarantees ordered execution of jobs across multiple instances using cryptographically-signed tokens.' },
-        { name: 'HTTPD and Networking', url: '/proxying-with-advancednetworking-and-dispatcher.html', description: 'AEM as a Cloud Service Dispatcher and Advanced Networking.' },
-        { name: 'includePropertyTypes in AEM Indexes', url: '/include-property-types.html', description: 'How includePropertyTypes affects full text query results with CONTAINS in JCR-SQL2.' },
-        { name: 'Review the AEM Archetype', url: '/aem-archetype-and-preventing-errors.html', description: 'Leveraging the AEM Archetype to prevent runtime errors.' },
-        { name: 'SAML Symmetry', url: '/saml-request-response-symmetry.html', description: 'SAML Authentication in AEM requires the content to come back to the original SAML request or else HTTP 422 errors may occur.' },
-        { name: 'Thread starvation?', url: '/what-is-thread-starvation.html', description: 'Learn about thread starvation and how it can affect your JVM\'s performance, or worse, cause it to crash.' },
-        { name: 'Where is my workflow?', url: '/queueing-and-processing.html', description: 'Many things in AEM get queued for processing; understanding why a queue stops processing entries.' },
-        { name: 'Asynchronous Deadlock', url: '/always-provide-an-executor.html', description: 'Why asynchronous Java code in AEM needs an explicit executor.' },
-        { name: 'Death by Sling Model', url: '/algolia-postconstruct-thread-starvation.html', description: 'Creating an Algolia SearchClient inside a Sling Model @PostConstruct leaks I/O dispatcher threads on every request.' },
-        { name: 'JVM thread starvation caused by sling model', url: '/sling-model-query-abuse.html', description: 'Running a JCR query in every Sling Model @PostConstruct turns a single page render into a burst of Lucene file I/O.' },
-        { name: 'Java makes it easy to write bad code', url: '/java-makes-it-easy-to-write-bad-code.html', description: 'Synchronized, unbounded collections, and HttpClient\'s missing default timeouts make it trivial to starve a servlet container\'s thread pool.' }
-    ];
+    {
+        "slug": "blog-1",
+        "name": "Git Init",
+        "summary": "Kicking off the blog."
+    },
+    {
+        "slug": "guarded-job-management",
+        "name": "Herding Cats: Ordered Job Processing",
+        "summary": "A deep dive into Guarded Job Management, a distributed job processing system for AEM that guarantees ordered execution of jobs across multiple instances using cryptographically-signed tokens.",
+        "title": "Herding Cats: Ordered Job Processing in AEM",
+        "description": "A deep dive into Guarded Job Management — a distributed job processing system for AEM that guarantees ordered execution of jobs across multiple instances using cryptographically-signed tokens."
+    },
+    {
+        "slug": "proxying-with-advancednetworking-and-dispatcher",
+        "name": "HTTPD and Networking",
+        "summary": "AEM as a Cloud Service Dispatcher and Advanced Networking.",
+        "title": "AEM as a Cloud Service Dispatcher and Advanced Networking",
+        "description": "AEM as a Cloud Service Dispatcher and Advanced Networking"
+    },
+    {
+        "slug": "include-property-types",
+        "name": "includePropertyTypes in AEM Indexes",
+        "summary": "How includePropertyTypes affects full text query results with CONTAINS in JCR-SQL2.",
+        "title": "Understanding includePropertyTypes in AEM Lucene Indexes",
+        "description": "How includePropertyTypes affects full text query results with CONTAINS in JCR-SQL2"
+    },
+    {
+        "slug": "aem-archetype-and-preventing-errors",
+        "name": "Review the AEM Archetype",
+        "summary": "Leveraging the AEM Archetype to prevent runtime errors.",
+        "title": "AEM Archetype and how it can prevent errors",
+        "description": "Leveraging the AEM Archetype to prevent runtime errors"
+    },
+    {
+        "slug": "saml-request-response-symmetry",
+        "name": "SAML Symmetry",
+        "summary": "SAML Authentication in AEM requires the content to come back to the original SAML request or else HTTP 422 errors may occur.",
+        "title": "SAML Authentication in AEM, symmetry is key",
+        "description": "SAML Authentication in AEM requires the content to come back to the original SAML request or else HTTP 422 errors may occur"
+    },
+    {
+        "slug": "what-is-thread-starvation",
+        "name": "Thread starvation?",
+        "summary": "Learn about thread starvation and how it can affect your JVM's performance, or worse, cause it to crash.",
+        "title": "JVM Thread Starvation and how to detect it",
+        "description": "Transactions come and go but the goal is to not have them linger around, learn about thread starvation and how it can effect your JVM's performance or worse cause it to crash"
+    },
+    {
+        "slug": "queueing-and-processing",
+        "name": "Where is my workflow?",
+        "summary": "Many things in AEM get queued for processing; understanding why a queue stops processing entries.",
+        "title": "Why are my workflows not processing?",
+        "description": "Many things in AEM get queued for processing, this blog is here to help you understand how to determine why the queue is not processing entries within it",
+        "image": "/assets/debugging-linkedin.jpg",
+        "imageWidth": 1200,
+        "imageHeight": 1200
+    },
+    {
+        "slug": "always-provide-an-executor",
+        "name": "Asynchronous Deadlock",
+        "summary": "Why asynchronous Java code in AEM needs an explicit executor.",
+        "title": "Asynchronous Java code in AEM"
+    },
+    {
+        "slug": "algolia-postconstruct-thread-starvation",
+        "name": "Death by Sling Model",
+        "summary": "Creating an Algolia SearchClient inside a Sling Model @PostConstruct leaks I/O dispatcher threads on every request.",
+        "title": "Algolia in @PostConstruct: How a Sling Model can starve your JVM",
+        "description": "Creating an Algolia SearchClient inside a Sling Model @PostConstruct leaks I/O dispatcher threads on every request. Learn why Sling Models are not Singletons, why OSGi Services are, and how to fix the leak before it crashes your AEM instance."
+    },
+    {
+        "slug": "sling-model-query-abuse",
+        "name": "JVM thread starvation caused by sling model",
+        "summary": "Running a JCR query in every Sling Model @PostConstruct turns a single page render into a burst of Lucene file I/O.",
+        "title": "Query Abuse in Sling Models: How Per-Component JCR Queries Create I/O Contention",
+        "description": "Running a JCR query in every Sling Model @PostConstruct turns a single page render into a burst of Lucene file I/O that contends on a kernel-level NativeThreadSet lock. Learn how the Lucene index is read, why FileChannelImpl serializes concurrent readers, and how to run the query once per render instead of once per component."
+    },
+    {
+        "slug": "java-makes-it-easy-to-write-bad-code",
+        "name": "Java makes it easy to write bad code",
+        "summary": "Synchronized, unbounded collections, and HttpClient's missing default timeouts make it trivial to starve a servlet container's thread pool.",
+        "description": "Java isn't slow, but synchronized, unbounded collections, and HttpClient's missing default timeouts make it trivial to write code that starves a servlet container's fixed thread pool."
+    },
+    {
+        "slug": "slow-activation-could-not-obtain-lock",
+        "name": "Present but not available",
+        "summary": "A slow activate() in a delayed OSGi component makes Felix SCR fail with \"Could not obtain lock\", so consumers get null and dependent components never activate even though the service is registered.",
+        "title": "Present but not available: slow OSGi activation and 'Could not obtain lock'",
+        "description": "A registered OSGi service can still hand its consumers null. How a slow activate() in a delayed Declarative Services component makes Felix SCR time out with 'Could not obtain lock' and leaves dependent components unactivated."
+    }
+]
+;
 </script>
 
     </main>

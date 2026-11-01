@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pat Lego.com</title>
+<meta name="description" content="Patrique Legault's website, all content relating to him and his work with technology">
+<meta name="keywords" content="Patrique Legault, personal website, portfolio, web development, projects">
+<meta name="author" content="Patrique Legault">
+
+<meta property="og:locale" content="en_US" />
+<meta property="og:image:type" content="image/jpeg" />
+<meta property="og:image:alt" content="Pat Legault profile picture" />
+<meta property="og:type" content="website" />
+
+<!-- Include CSS -->
+<link href="../css/tailwind.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<style>
+    body {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+        margin: 0;
+    }
+
+    main {
+        flex: 1;
+    }
+</style>
+
+<!-- Include JS -->
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.7/dist/cdn.min.js"></script>
+    <link rel="canonical" href="https://www.patlego.com/blogs/slow-activation-could-not-obtain-lock.html" />
+
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Present but not available: slow OSGi activation and 'Could not obtain lock'" />
+    <meta property="og:description" content="A registered OSGi service can still hand its consumers null. How a slow activate() in a delayed Declarative Services component makes Felix SCR time out with 'Could not obtain lock' and leaves dependent components unactivated." />
+    <meta property="og:url" content="https://www.patlego.com/blogs/slow-activation-could-not-obtain-lock.html" />
+    <meta property="og:image" content="https://www.patlego.com/assets/social.png" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="1080" />
+    <meta property="og:image:height" content="1080" />
+    <meta property="og:image:alt" content="Present but not available: slow OSGi activation and 'Could not obtain lock'" />
+    <meta property="article:author" content="Patrique Legault" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Present but not available: slow OSGi activation and 'Could not obtain lock'" />
+    <meta name="twitter:description" content="A registered OSGi service can still hand its consumers null. How a slow activate() in a delayed Declarative Services component makes Felix SCR time out with 'Could not obtain lock' and leaves dependent components unactivated." />
+    <meta name="twitter:image" content="https://www.patlego.com/assets/social.png" />
+</head>
+
+<body>
+    <div>
+        <!-- Include header -->
+        <header x-data="{ open: false }">
+    <div class="flex justify-between items-center p-4 bg-black">
+        <h1 class="text-xl font-bold text-white">Pat Lego.com</h1>
+        <nav class="hidden md:block">
+            <ul class="flex space-x-4">
+                <li><a class="hover:text-blue-500 text-white" href="/">Home</a></li>
+                <li><a class="hover:text-blue-500 text-white" href="/about.html">About</a></li>
+                <li><a class="hover:text-blue-500 text-white" href="/blogs.html">Blogs</a></li>
+                <li><a class="hover:text-blue-500 text-white" href="/store.html">Store</a></li>
+            </ul>
+        </nav>
+        <button @click="open = !open" class="md:hidden text-white focus:outline-none">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+            </svg>
+        </button>
+    </div>
+
+    <!-- Mobile Menu -->
+    <div x-show="open" class="md:hidden flex flex-col items-end w-full bg-black p-4">
+        <nav>
+            <ul class="flex flex-col space-y-4">
+                <li><a class="hover:text-blue-500 text-white" href="/">Home</a></li>
+                <li><a class="hover:text-blue-500 text-white" href="/about.html">About</a></li>
+                <li><a class="hover:text-blue-500 text-white" href="/blogs.html">Blogs</a></li>
+                <li><a class="hover:text-blue-500 text-white" href="/store.html">Store</a></li>
+            </ul>
+        </nav>
+    </div>
+</header>
+
+    </div>
+
+    <main>
+        <section>
+    <div class="flex flex-col items-center min-h-screen">
+        <a href="/blogs.html" class="text-sm text-blue-500 hover:underline self-start ml-3 mt-3 md:ml-5 md:mt-5">&larr; Back to Blogs</a>
+        <h1 class="font-bold m-3 text-2xl md:text-xl md:m-5 text-center">
+            Present but not available: slow OSGi activation and "Could not obtain lock"
+        </h1>
+
+        <div class="flex flex-col justify-center md:min-h-96 md:m-1 text-lg md:text-xl w-full md:w-1/2 lg:w-2/3 [overflow-wrap:anywhere]">
+
+            <p class="m-5">
+                The OSGi console says everything is fine. Bundle active. Service registered. Every reference
+                satisfied. And yet your component is not active, or <code>getService()</code> just handed you
+                <code>null</code>. The only clue is one line in the log:
+            </p>
+
+            <div class="mx-5 my-3 flex">
+                <div class="min-w-0 w-full bg-gray-900 text-green-400 font-mono text-xs md:text-sm p-3 md:p-4 rounded-lg overflow-x-auto whitespace-pre">FrameworkEvent ERROR (org.osgi.framework.ServiceException:
+  Service factory exception: Could not obtain lock)</div>
+            </div>
+
+            <p class="m-5">
+                Short version: in Apache Felix SCR (the Declarative Services runtime behind Felix and Sling based
+                containers), a component that is <em>present</em> is not necessarily <em>available</em>. If its
+                <code>activate()</code> is slow, everyone else who asks for it during that time waits on a lock, and
+                that lock has a timeout. When it expires, they leave with nothing, even though the service would have
+                been ready a few seconds later.
+            </p>
+
+            <p class="m-5">
+                This is not new. It has its own Felix ticket,
+                <a class="text-blue-500 hover:underline" href="https://issues.apache.org/jira/browse/FELIX-6048">FELIX-6048</a>,
+                open since 2019. What is missing is a plain explanation of what the message means, so here is one,
+                with a sample you can run:
+                <a class="text-blue-500 hover:underline" href="https://github.com/pat-lego/scr-lock-contention-sample">pat-lego/scr-lock-contention-sample</a>.
+            </p>
+
+            <h2 id="state-lock-and-timeout" class="font-bold text-xl md:text-2xl m-5">Registered is not the same as ready</h2>
+
+            <p class="m-5">
+                A component that provides a service is <em>delayed</em> by default. Once its references are satisfied,
+                SCR registers the service, but it does not create the object yet. The instance is built, and
+                <code>activate()</code> runs, the first time someone calls <code>getService()</code>. It is a
+                restaurant that is "open" while the chef is still driving to work.
+            </p>
+
+            <p class="m-5">
+                While <code>activate()</code> runs, SCR holds that component's state lock. Anyone else who needs the
+                component waits for the lock, but not forever
+                (<a class="text-blue-500 hover:underline" href="https://github.com/apache/felix-dev/blob/org.apache.felix.scr-2.2.18/scr/src/main/java/org/apache/felix/scr/impl/manager/AbstractComponentManager.java#L235-L262">AbstractComponentManager.java</a>):
+            </p>
+
+            <div class="mx-5 my-3 flex">
+                <div class="min-w-0 w-full bg-gray-900 text-green-400 font-mono text-xs md:text-sm p-3 md:p-4 rounded-lg overflow-x-auto whitespace-pre">if (!lock.tryLock(getLockTimeout(), TimeUnit.MILLISECONDS))
+{
+    dumpThreads();
+    throw new IllegalStateException("Could not obtain lock");
+}</div>
+            </div>
+
+            <p class="m-5">
+                The timeout is <code>ds.lock.timeout.milliseconds</code>, default <strong>5000 ms</strong>
+                (<a class="text-blue-500 hover:underline" href="https://github.com/apache/felix-dev/blob/org.apache.felix.scr-2.2.18/scr/src/main/java/org/apache/felix/scr/impl/manager/ScrConfiguration.java#L56-L60">ScrConfiguration.java</a>).
+                Five seconds. That is the whole patience budget. Because SCR registers the service as a
+                <code>ServiceFactory</code>, the framework wraps the exception in a <code>ServiceException</code>,
+                logs it as a <code>FrameworkEvent ERROR</code>, and the caller gets <code>null</code>
+                (<a class="text-blue-500 hover:underline" href="https://github.com/apache/felix-dev/blob/org.apache.felix.framework-7.0.5/framework/src/main/java/org/apache/felix/framework/ServiceRegistrationImpl.java#L344-L356">ServiceRegistrationImpl.java</a>).
+            </p>
+
+            <h2 id="two-consumers-one-lock" class="font-bold text-xl md:text-2xl m-5">Reproducing it: one slow component, two callers</h2>
+
+            <p class="m-5">
+                The sample has a component whose only hobby is being slow:
+            </p>
+
+            <div class="mx-5 my-3 flex">
+                <div class="min-w-0 w-full bg-gray-900 text-green-400 font-mono text-xs md:text-sm p-3 md:p-4 rounded-lg overflow-x-auto whitespace-pre">@Component(service = SlowActivationService.class)   // delayed by default
+public class SlowActivationServiceImpl implements SlowActivationService {
+
+    @Activate
+    protected void activate(final Config config) {
+        // stands in for network calls, cache warm-up, big files...
+        Thread.sleep(config.activation_delay_ms());    // 15000 ms
+    }
+}</div>
+            </div>
+
+            <p class="m-5">
+                Then two threads ask for it, one second apart, from two different bundles. The first one (the
+                <em>holder</em>) triggers activation and sits inside <code>activate()</code> holding the lock. The
+                second one (the <em>waiter</em>) waits five seconds and gives up:
+            </p>
+
+            <div class="mx-5 my-3 flex">
+                <div class="min-w-0 w-full bg-gray-900 text-green-400 font-mono text-xs md:text-sm p-3 md:p-4 rounded-lg overflow-x-auto whitespace-pre">09:41:11.799 [holder] activate() START; sleeping 15000 ms
+09:41:12.803 [waiter] getService() START
+09:41:17.878 [waiter] getService() returned null after 5075 ms
+09:41:17.879 FrameworkEvent ERROR (... Service factory exception: Could not obtain lock)
+09:41:26.804 [holder] activate() END after 15005 ms</div>
+            </div>
+
+            <p class="m-5">
+                At 09:41:17 the service is registered and nine seconds away from working perfectly, and the waiter is
+                told there is nothing there. Nothing is broken. It is just timing.
+            </p>
+
+            <p class="m-5">
+                Why two bundles? With two threads from the <em>same</em> bundle, the Felix framework makes the second
+                one wait on its own latch before it ever reaches the SCR lock
+                (<a class="text-blue-500 hover:underline" href="https://github.com/apache/felix-dev/blob/org.apache.felix.framework-7.0.5/framework/src/main/java/org/apache/felix/framework/ServiceRegistry.java#L346-L396">ServiceRegistry.java</a>),
+                so it never times out. In a real system a popular service has many consumer bundles, so this is the
+                normal case, not a lab trick.
+            </p>
+
+            <h2 id="dependent-components" class="font-bold text-xl md:text-2xl m-5">The real damage: components that reference it</h2>
+
+            <p class="m-5">
+                Most code does not call <code>getService()</code> by hand. It uses <code>@Reference</code>:
+            </p>
+
+            <div class="mx-5 my-3 flex">
+                <div class="min-w-0 w-full bg-gray-900 text-green-400 font-mono text-xs md:text-sm p-3 md:p-4 rounded-lg overflow-x-auto whitespace-pre">@Component(immediate = true)
+public class ReportGenerator {
+    @Reference   // mandatory, static
+    private SlowActivationService slowService;
+}</div>
+            </div>
+
+            <p class="m-5">
+                To activate <code>ReportGenerator</code>, SCR first collects its references by calling
+                <code>getService()</code> on each one
+                (<a class="text-blue-500 hover:underline" href="https://github.com/apache/felix-dev/blob/org.apache.felix.scr-2.2.18/scr/src/main/java/org/apache/felix/scr/impl/manager/AbstractComponentManager.java#L1057-L1075">collectDependencies()</a>).
+                If the slow service is mid-activation for another bundle, that call times out, SCR logs
+                <code>Could not obtain all required dependencies, getService returning null</code>
+                (<a class="text-blue-500 hover:underline" href="https://github.com/apache/felix-dev/blob/org.apache.felix.scr-2.2.18/scr/src/main/java/org/apache/felix/scr/impl/manager/SingleComponentManager.java#L954-L966">SingleComponentManager.java</a>),
+                and <code>ReportGenerator</code> is not activated. Its own <code>activate()</code> never runs, so your
+                code logs nothing at all.
+            </p>
+
+            <ul class="m-5 ml-10 list-disc">
+                <li class="mb-2">The component shows as <strong>satisfied but not active</strong>. The dependency is
+                    right there. It just was not available at the moment SCR asked.</li>
+                <li class="mb-2">For a mandatory reference there is no automatic retry. SCR's late-binding path only
+                    covers optional references (<code>cardinalitySatisfied(0)</code> in
+                    <a class="text-blue-500 hover:underline" href="https://github.com/apache/felix-dev/blob/org.apache.felix.scr-2.2.18/scr/src/main/java/org/apache/felix/scr/impl/manager/DependencyManager.java#L1186-L1194">DependencyManager.java</a>).
+                    An immediate component stays down until something triggers a new attempt: a config change, the
+                    service being re-registered, or a restart.</li>
+                <li class="mb-2">A delayed consumer is retried the next time someone asks for it, so there the symptom
+                    is intermittent.</li>
+            </ul>
+
+            <p class="m-5">
+                That is why it mostly shows up at startup or right after a deployment, when everything activates at
+                once. And why "have you tried restarting it?" works so often: it rolls the dice on timing again.
+            </p>
+
+            <h2 id="not-the-first" class="font-bold text-xl md:text-2xl m-5">You are not the first to hit this</h2>
+
+            <p class="m-5">
+                <a class="text-blue-500 hover:underline" href="https://issues.apache.org/jira/browse/FELIX-6048">FELIX-6048</a>
+                was opened in 2019 against SCR 2.1.14 ("w/o having ever seen any impact"). Since then it has collected
+                reports from 2.1.20, 2.2.2 and 2.2.4, comments like "no workaround except restarting the whole thing",
+                and requests from the maintainers for a test case and a debug thread dump. No reproducer was posted, and
+                it is still open. Older tickets with the same message
+                (<a class="text-blue-500 hover:underline" href="https://issues.apache.org/jira/browse/FELIX-3645">FELIX-3645</a>,
+                <a class="text-blue-500 hover:underline" href="https://issues.apache.org/jira/browse/FELIX-3862">FELIX-3862</a>)
+                were real SCR bugs and were fixed. The timeout stayed, by design.
+            </p>
+
+            <p class="m-5">
+                Other projects have hit it too, and the ones that dug in found the same thing:
+            </p>
+
+            <ul class="m-5 ml-10 list-disc">
+                <li class="mb-2"><a class="text-blue-500 hover:underline" href="https://github.com/enonic/xp/issues/8173">Enonic XP #8173</a>:
+                    repository setup inside <code>activate()</code> was slow on a slow disk. The maintainers called
+                    raising the timeout "not very robust" and moved toward async initialization.</li>
+                <li class="mb-2"><a class="text-blue-500 hover:underline" href="https://github.com/openhab/openhab-core/issues/2779">openHAB #2779</a>:
+                    a constructor that installed add-ons "takes some time", and the service was injected into others
+                    before it finished.</li>
+                <li class="mb-2">A FELIX-6048 comment from OpenDaylight: "the component is being accessed via Service
+                    Registry while its activate() method is still executing", with timestamps that match the sample
+                    almost exactly.</li>
+                <li class="mb-2"><a class="text-blue-500 hover:underline" href="https://github.com/atomix/atomix/issues/1055">ONOS / Atomix #1055</a> and
+                    <a class="text-blue-500 hover:underline" href="https://github.com/OpenIdentityPlatform/OpenIDM/issues/228">OpenIDM #228</a>:
+                    the same <code>prebind</code> &rarr; <code>collectDependencies</code> stack at startup.</li>
+            </ul>
+
+            <p class="m-5">
+                Every report has the stack trace and "a restart fixed it". Few say what it means: <em>some component
+                held its lock longer than the timeout, usually because its activation was slow, and whoever needed it
+                gave up.</em> The stack tells you which side you are on. Through <code>prebind</code> &rarr;
+                <code>collectDependencies</code>: a dependent component failed to collect a reference. Straight from
+                your own <code>getService()</code>: a direct lookup got <code>null</code>. The same timeout also guards
+                reconfiguration and deactivation, which is why those stacks show up too. Either way, go find the thread
+                holding the lock.
+            </p>
+
+            <h2 id="who-holds-the-lock" class="font-bold text-xl md:text-2xl m-5">Getting SCR to show you who holds the lock</h2>
+
+            <p class="m-5">
+                That <code>dumpThreads()</code> call writes a full thread dump at the moment of the timeout, but only
+                when the component's logger is at <code>DEBUG</code>
+                (<a class="text-blue-500 hover:underline" href="https://github.com/apache/felix-dev/blob/org.apache.felix.scr-2.2.18/scr/src/main/java/org/apache/felix/scr/impl/manager/AbstractComponentManager.java#L302-L315">source</a>).
+                The logger name is the component's implementation class, not only <code>org.apache.felix.scr</code>.
+                Two gates must both be at <code>DEBUG</code>:
+            </p>
+
+            <ul class="m-5 ml-10 list-disc">
+                <li class="mb-2"><strong>OSGi Log Admin</strong>, which decides whether SCR builds the dump at all.
+                    In the sample:
+                    <a class="text-blue-500 hover:underline" href="https://github.com/pat-lego/scr-lock-contention-sample/blob/main/ui.config/src/main/content/jcr_root/apps/scrlockdump/osgiconfig/config/org.osgi.service.log.admin.cfg.json">org.osgi.service.log.admin.cfg.json</a>.</li>
+                <li class="mb-2"><strong>Your logging backend</strong>, so the entry reaches the log file. In the sample:
+                    <a class="text-blue-500 hover:underline" href="https://github.com/pat-lego/scr-lock-contention-sample/blob/main/ui.config/src/main/content/jcr_root/apps/scrlockdump/osgiconfig/config/org.apache.sling.commons.log.LogManager.factory.config~scrlockdump-scr-threaddump.cfg.json">the Sling logger config</a>.</li>
+            </ul>
+
+            <div class="mx-5 my-3 flex">
+                <div class="min-w-0 w-full bg-gray-900 text-green-400 font-mono text-xs md:text-sm p-3 md:p-4 rounded-lg overflow-x-auto whitespace-pre">// org.osgi.service.log.admin.cfg.json
+{
+  "&lt;fully.qualified.ImplementationClass&gt;": "DEBUG"
+}</div>
+            </div>
+
+            <p class="m-5">
+                The dump is taken by the thread that gave up, and it does not name the lock owner
+                (<code>LockOwnerId</code> is <code>-1</code> everywhere, which is about as helpful as it sounds). Find
+                the holder by its stack instead: the thread inside <code>getServiceInternal</code> &rarr;
+                <code>createComponent</code> for the same component. The frames above that are your slow code.
+            </p>
+
+            <div class="mx-5 my-3 flex">
+                <div class="min-w-0 w-full bg-gray-900 text-green-400 font-mono text-xs md:text-sm p-3 md:p-4 rounded-lg overflow-x-auto whitespace-pre">name: scr-lock-test-holder State: TIMED_WAITING
+  ...SlowActivationServiceImpl.activate(SlowActivationServiceImpl.java:52)
+  ...SingleComponentManager.createComponent(SingleComponentManager.java:115)
+  ...SingleComponentManager.getServiceInternal(SingleComponentManager.java:974)</div>
+            </div>
+
+            <h2 id="how-to-avoid-it" class="font-bold text-xl md:text-2xl m-5">How to avoid it</h2>
+
+            <p class="m-5">
+                <span class="font-semibold">Keep <code>activate()</code> boring.</span> Read config, assign fields,
+                return. Network calls, cache warm-up and big file parsing do not belong inside SCR's lock.
+            </p>
+
+            <p class="m-5">
+                <span class="font-semibold">Do the slow part somewhere else.</span> Kick it off on your own executor
+                and let callers wait with their own timeout, or initialize lazily on first use:
+            </p>
+
+            <div class="mx-5 my-3 flex">
+                <div class="min-w-0 w-full bg-gray-900 text-green-400 font-mono text-xs md:text-sm p-3 md:p-4 rounded-lg overflow-x-auto whitespace-pre">@Activate
+protected void activate(final Config config) {
+    executor = Executors.newSingleThreadExecutor();
+    // returns immediately, SCR releases the lock right away
+    client = CompletableFuture.supplyAsync(() -&gt; Client.connect(config), executor);
+}
+
+public Result doWork() throws Exception {
+    return client.get(2, TimeUnit.SECONDS).call();   // caller picks the timeout
+}
+
+@Deactivate
+protected void deactivate() {
+    executor.shutdownNow();
+}</div>
+            </div>
+
+            <p class="m-5">
+                <span class="font-semibold">Do not just raise the timeout.</span>
+                <code>ds.lock.timeout.milliseconds</code> is framework-wide. Raising it does not make anything faster.
+                It makes everyone wait longer for anything that is stuck, and hides the slow <code>activate()</code>.
+            </p>
+
+            <p class="m-5">
+                <span class="font-semibold"><code>immediate = true</code> helps a little.</span> It moves activation to
+                startup instead of the first request, which can shrink the window. The lock is still held for the full
+                <code>activate()</code>, so it does not close it.
+            </p>
+
+            <p class="m-5">
+                <span class="font-semibold">Know the smell.</span> Satisfied but not active, and its
+                <code>activate()</code> never logged a thing? Search for <code>Could not obtain lock</code> and
+                <code>Could not obtain all required dependencies</code> around startup.
+            </p>
+
+            <h2 id="try-it-yourself" class="font-bold text-xl md:text-2xl m-5">Try it yourself</h2>
+
+            <p class="m-5">
+                The <a class="text-blue-500 hover:underline" href="https://github.com/pat-lego/scr-lock-contention-sample">sample project</a>
+                fails the same way on every run, which is exactly the kind of reproducer FELIX-6048 asked for. It
+                includes the slow component, the two-bundle runner, a servlet to trigger another run, the logging
+                config, and a script that formats SCR's one-line thread dump. Install it on a local Sling-based author
+                instance, then:
+            </p>
+
+            <div class="mx-5 my-3 flex">
+                <div class="min-w-0 w-full bg-gray-900 text-green-400 font-mono text-xs md:text-sm p-3 md:p-4 rounded-lg overflow-x-auto whitespace-pre">mvn clean install -PautoInstallSinglePackage
+
+curl -u admin:&lt;password&gt; -X POST -H "Referer: http://localhost:4502" \
+  http://localhost:4502/bin/scrlockdump/run
+
+grep -n -E "scr-lock-test|Could not obtain lock|: Thread dump" \
+  crx-quickstart/logs/error.log
+
+python3 tools/format_scr_threaddump.py crx-quickstart/logs/error.log</div>
+            </div>
+
+            <p class="m-5">
+                The takeaway: in Declarative Services, "registered" means "can be activated", not "is ready". A slow
+                <code>activate()</code> turns every concurrent consumer into a five-second race, and the losers get
+                <code>null</code> from a service that is right there.
+            </p>
+
+            <p class="m-5">
+                <a class="text-blue-500 hover:underline bg-gray-200 rounded-full px-2 py-1 inline-block m-1">#osgi</a>
+                <a class="text-blue-500 hover:underline bg-gray-200 rounded-full px-2 py-1 inline-block m-1">#declarative-services</a>
+                <a class="text-blue-500 hover:underline bg-gray-200 rounded-full px-2 py-1 inline-block m-1">#felix</a>
+                <a class="text-blue-500 hover:underline bg-gray-200 rounded-full px-2 py-1 inline-block m-1">#sling</a>
+                <a class="text-blue-500 hover:underline bg-gray-200 rounded-full px-2 py-1 inline-block m-1">#threads</a>
+                <a class="text-blue-500 hover:underline bg-gray-200 rounded-full px-2 py-1 inline-block m-1">#locks</a>
+            </p>
+        </div>
+    </div>
+</section>
+
+    </main>
+
+    <!-- Include footer -->
+    <footer class="bg-black text-white p-4">
+    <div class="flex justify-between items-center">
+        <p>&copy; Pat Lego.com</p>
+        <div class="flex items-start space-x-4">
+            <a class="mr-5" href="https://www.linkedin.com/in/patrique-legault" target="_blank">
+                <i class="fab fa-linkedin fa-2x"></i>
+            </a>
+            <a class="pr-5" href="https://www.facebook.com/pat.legault.319" target="_blank">
+                <i class="fab fa-facebook fa-2x"></i>
+            </a>
+        </div>
+    </div>
+</footer>
+
+    <!-- Link icon next to each section heading, for sharing /blogs/<slug>.html#section links -->
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const slugify = (text) => text.toLowerCase().trim()
+            .replace(/[^a-z0-9\s-]/g, '')
+            .replace(/\s+/g, '-')
+            .replace(/-+/g, '-');
+        document.querySelectorAll('main h2').forEach((heading) => {
+            const title = heading.textContent.trim();
+            if (!heading.id) {
+                let id = slugify(title) || 'section';
+                let n = 2;
+                while (document.getElementById(id)) {
+                    id = `${slugify(title)}-${n++}`;
+                }
+                heading.id = id;
+            }
+            heading.classList.add('group', 'scroll-mt-4');
+
+            const link = document.createElement('a');
+            link.href = `#${heading.id}`;
+            link.className = 'section-link ml-2 text-base align-middle text-gray-400 hover:text-blue-500 opacity-50 group-hover:opacity-100 focus:opacity-100';
+            link.title = 'Copy link to this section';
+            link.setAttribute('aria-label', `Copy link to section: ${title}`);
+            link.innerHTML = '<i class="fas fa-link"></i>';
+            link.addEventListener('click', (event) => {
+                event.preventDefault();
+                const url = `${location.origin}${location.pathname}#${heading.id}`;
+                history.replaceState(null, '', `#${heading.id}`);
+                heading.scrollIntoView({ behavior: 'smooth' });
+                if (navigator.clipboard) {
+                    navigator.clipboard.writeText(url).then(() => {
+                        link.innerHTML = '<i class="fas fa-check"></i>';
+                        link.title = 'Link copied';
+                        setTimeout(() => {
+                            link.innerHTML = '<i class="fas fa-link"></i>';
+                            link.title = 'Copy link to this section';
+                        }, 1500);
+                    }).catch(() => {});
+                }
+            });
+            heading.appendChild(link);
+        });
+        // Ids generated above did not exist when the browser tried to jump to the #fragment, so jump now.
+        if (location.hash) {
+            const target = document.getElementById(decodeURIComponent(location.hash.slice(1)));
+            if (target) {
+                target.scrollIntoView();
+            }
+        }
+    });
+</script>
+
+</body>
+
+</html>

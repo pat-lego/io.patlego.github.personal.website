@@ -24,9 +24,10 @@ src/
       blogs.html         # The blog listing UI (search + card grid)
       store.html         # The store listing UI (search + Content/Courses sections)
   blogs/
-    <slug>.html          # One full page per blog post (its own <head>/OG tags)
+    blogs.json           # One entry per post: slug, card text, social-preview title/description
+    _post-template.html  # The single shared page every post is rendered from (head, meta, header, footer)
     partials/
-      <slug>.html        # The actual blog post content, included by blogs/<slug>.html
+      <slug>.html        # The actual blog post content
   store/
     <slug>.html          # One full page per product/course (its own <head>/OG tags)
     partials/
@@ -63,7 +64,8 @@ Every page follows the same include pattern (via `gulp-file-include`, prefix `@@
 
 - `css` — compiles `src/styles/**/*.css` with PostCSS/Tailwind into `docs/css`.
 - `htmlPages` — compiles top-level `src/*.html` (home, about, blogs, store) into `docs/`.
-- `htmlBlogs` — compiles `src/blogs/**/*.html` (including its `partials/`) into `docs/blogs`.
+- `htmlBlogs` — renders `src/blogs/_post-template.html` once per entry in `src/blogs/blogs.json` into
+  `docs/blogs/<slug>.html`, and fails the build if an entry is invalid or its partial is missing.
 - `htmlStore` — compiles `src/store/**/*.html` (including its `partials/`) into `docs/store`.
 - `assets` — copies `src/assets/**/*` into `docs/assets`.
 - `watch` — serves `docs/` with browser-sync and re-runs the tasks above on file changes.
@@ -83,33 +85,53 @@ deployment is just "build locally, commit `docs/`, push".
 
 ## Adding a new blog post
 
-A blog post needs three things:
+A blog post needs two things. There is no per-post page to copy: every post is rendered from
+`src/blogs/_post-template.html`.
 
-1. **The full page** — `src/blogs/<slug>.html`. Copy an existing one (e.g.
-   `src/blogs/java-makes-it-easy-to-write-bad-code.html`) and update the `og:*`/`twitter:*` meta
-   tags (title, description, url, canonical) so the post has correct social-share previews, and
-   point the `@@include('partials/<slug>.html')` at your new partial.
-2. **The content partial** — `src/blogs/partials/<slug>.html`. This is just the actual article
-   markup (heading + paragraphs), wrapped in a `<section>`. Every existing post starts with a
-   "← Back to Blogs" link right under the opening `<div>` — keep that for consistency.
-3. **A listing entry** — add an object to the `blogs` array at the bottom of
-   `src/partials/pages/blogs.html` so it shows up as a card on `/blogs.html`:
+1. **The article** — `src/blogs/partials/<slug>.html`. Just the article markup wrapped in a
+   `<section>`, starting with the "← Back to Blogs" link like the existing posts.
+2. **An entry in `src/blogs/blogs.json`** — this one entry drives both the card on `/blogs.html` and
+   the generated page `docs/blogs/<slug>.html` (canonical URL, `og:*` and `twitter:*` tags):
 
-```html
-<script>
-    const blogs = [
-        {
-            name: 'My New Post Title',
-            url: '/my-new-post.html',
-            description: 'One sentence describing what this post is about.'
-        },
-        // ...existing entries
-    ];
-</script>
+```json
+{
+    "slug": "my-new-post",
+    "name": "My New Post",
+    "summary": "One sentence for the card on /blogs.html.",
+    "title": "Optional longer title for social previews (defaults to name)",
+    "description": "Optional longer description for social previews (defaults to summary)",
+    "image": "/assets/my-image.jpg",
+    "imageWidth": 1200,
+    "imageHeight": 1200
+}
 ```
 
-`url` must match the filename you gave `src/blogs/<slug>.html` (the listing links to
-`/blogs${blog.url}`). Run `yarn start`/`yarn build` and the new card + page will appear.
+- `slug`, `name` and `summary` are required. `slug` is the file name of the partial and the URL
+  (`/blogs/<slug>.html`); only `a-z`, `0-9` and `-`.
+- `title`, `description`, `image`, `imageWidth`, `imageHeight` are optional. Without `image`, the
+  default `/assets/social.png` (1080×1080) is used.
+- Entries are shown on `/blogs.html` in file order.
+- Values are HTML-escaped by the build, so write them as plain text.
+
+Run `yarn build` (or `yarn start`) and the card and page appear. A missing field, a duplicate slug, or
+a slug without a matching partial stops the build with an error naming the entry.
+
+### Linking to a section of a blog post
+
+Every `<h2>` inside `<main>` on a blog post gets a link icon next to it (script in
+`src/partials/blog-section-links.html`, included only by `src/blogs/_post-template.html`). Clicking it copies the section URL, e.g.
+`https://www.patlego.com/blogs/slow-activation-could-not-obtain-lock.html#how-to-avoid-it`, and opening
+that URL jumps straight to the section.
+
+Give section headings an explicit, short `id` so shared links stay valid even if the heading text
+changes later:
+
+```html
+<h2 id="how-to-avoid-it" class="font-bold text-2xl m-5">How to avoid it</h2>
+```
+
+Headings without an `id` still get a link: the script generates one from the heading text
+(lowercase, spaces to `-`), but that id changes whenever the text does.
 
 ## Adding a new store product or course
 
